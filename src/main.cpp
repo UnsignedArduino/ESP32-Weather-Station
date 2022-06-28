@@ -186,10 +186,10 @@ void updateData() {
   // booted = false; // Test only
 
   if (booted) drawProgress(40, "Updating time...");
-  else fillSegment(22, 22, 0, (int) (20 * 3.6), 16, TFT_NAVY);
+  else fillSegment(22, 22, 0, 0, 12, TFT_NAVY);
 
   if (booted) drawProgress(60, "Updating weather...");
-  else fillSegment(22, 22, 0, (int) (50 * 3.6), 16, TFT_NAVY);
+  else fillSegment(22, 22, 0, 180, 12, TFT_NAVY);
 
   // Create the structures that hold the retrieved weather
   current = new OW_current;
@@ -226,8 +226,9 @@ void updateData() {
   }
   else
   {
-    fillSegment(22, 22, 0, 360, 16, TFT_NAVY);
-    fillSegment(22, 22, 0, 360, 22, TFT_BLACK);
+    fillSegment(22, 22, 0, 360, 12, TFT_NAVY);
+    delay(2000);
+    fillSegment(22, 22, 0, 360, 12, TFT_BLACK);
   }
 
   if (parsed)
