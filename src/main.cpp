@@ -109,40 +109,22 @@ void setup() {
   tft.begin();
   tft.fillScreen(TFT_BLACK);
 
+  drawProgress(0, "Initializing filesystem...");
+
   SPIFFS.begin();
+
+  drawProgress(10, "Initializing filesystem...");
   listFiles();
 
   // Enable if you want to erase SPIFFS, this takes some time!
   // then disable and reload sketch to avoid reformatting on every boot!
   #ifdef FORMAT_SPIFFS
-    tft.setTextDatum(BC_DATUM); // Bottom Centre datum
-    tft.drawString("Formatting SPIFFS, so wait!", 120, 195); SPIFFS.format();
+    drawProgress(10, "Wiping filesystem...");
+    SPIFFS.format();
   #endif
 
-  // Draw splash screen
-  if (SPIFFS.exists("/splash/OpenWeather.jpg")   == true) ui.drawJpeg("/splash/OpenWeather.jpg",   0, 40);
-
-  delay(2000);
-
-  // Clear bottom section of screen
-  tft.fillRect(0, 206, 240, 320 - 206, TFT_BLACK);
-
-  tft.loadFont(AA_FONT_SMALL);
-  tft.setTextDatum(BC_DATUM); // Bottom Centre datum
-  tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
-
-  tft.drawString("Original by: blog.squix.org", 120, 260);
-  tft.drawString("Adapted by: Bodmer", 120, 280);
-
-  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-
-  delay(2000);
-
-  tft.fillRect(0, 206, 240, 320 - 206, TFT_BLACK);
-
-  tft.drawString("Connecting to WiFi", 120, 240);
-  tft.setTextPadding(240); // Pad next drawString() text to full width to over-write old text
-
+  drawProgress(20, "Connecting to WiFi...");
+  
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -150,11 +132,6 @@ void setup() {
     Serial.print(".");
   }
   Serial.println();
-
-  tft.setTextDatum(BC_DATUM);
-  tft.setTextPadding(240); // Pad next drawString() text to full width to over-write old text
-  tft.drawString(" ", 120, 220);  // Clear line above using set padding width
-  tft.drawString("Fetching weather data...", 120, 240);
 
   // Fetch the time
   udp.begin(localPort);
@@ -203,10 +180,10 @@ void updateData() {
   // booted = true;  // Test only
   // booted = false; // Test only
 
-  if (booted) drawProgress(20, "Updating time...");
+  if (booted) drawProgress(40, "Updating time...");
   else fillSegment(22, 22, 0, (int) (20 * 3.6), 16, TFT_NAVY);
 
-  if (booted) drawProgress(50, "Updating conditions...");
+  if (booted) drawProgress(60, "Updating weather...");
   else fillSegment(22, 22, 0, (int) (50 * 3.6), 16, TFT_NAVY);
 
   // Create the structures that hold the retrieved weather
@@ -238,7 +215,7 @@ void updateData() {
 
   if (booted)
   {
-    drawProgress(100, "Done...");
+    drawProgress(100, "Done!");
     delay(2000);
     tft.fillScreen(TFT_BLACK);
   }
