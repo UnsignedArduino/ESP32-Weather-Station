@@ -60,8 +60,6 @@
 
 #include "NTP_Time.h"     // Attached to this sketch, see that tab for library needs
 
-#include "MoonPhase.h"
-
 /***************************************************************************************
 **                          Define the globals and class instances
 ***************************************************************************************/
@@ -104,7 +102,7 @@ int splitIndex(String text);
 **                          Setup
 ***************************************************************************************/
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(250000);
 
   tft.begin();
   tft.fillScreen(TFT_BLACK);

@@ -1,13 +1,14 @@
 //  Example from OpenWeather library: https://github.com/Bodmer/OpenWeather
 //  Adapted by Bodmer to use the TFT_eSPI library:  https://github.com/Bodmer/TFT_eSPI
 
-//  This sketch is compatible with the ESP8266 and ESP32
+//  This sketch is compatible with the RP2040 Nano Connect, ESP32 and ESP32 S2, it may
+//  also work on ESP8266 but this has not been tested.
 
 //                           >>>  IMPORTANT  <<<
 //         Modify setup in All_Settings.h tab to configure your location etc
 
 //                >>>  EVEN MORE IMPORTANT TO PREVENT CRASHES <<<
-//>>>>>>  For ESP8266 set SPIFFS to at least 2Mbytes before uploading files  <<<<<<
+//>>>>>>  For ESP8266 set LittleFS to at least 2Mbytes before uploading files  <<<<<<
 
 //  ESP8266/ESP32 pin connections to the TFT are defined in the TFT_eSPI library.
 
@@ -16,7 +17,7 @@
 //#define SERIAL_MESSAGES // For serial output weather reports
 //#define SCREEN_SERVER   // For dumping screen shots from TFT
 //#define RANDOM_LOCATION // Test only, selects random weather location every refresh
-//#define FORMAT_SPIFFS   // Wipe SPIFFS and all files!
+//#define FORMAT_LittleFS   // Wipe LittleFS and all files!
 
 // This sketch uses font files created from the Noto family of fonts as bitmaps
 // generated from these fonts may be freely distributed:
@@ -30,8 +31,11 @@
 // Json streaming parser (do not use IDE library manager version) to use is here:
 // https://github.com/Bodmer/JSON_Decoder
 
-#define AA_FONT_SMALL "fonts/NotoSansBold15" // 15 point sans serif bold
-#define AA_FONT_LARGE "fonts/NotoSansBold36" // 36 point sans serif bold
+#include <FS.h>
+#include <LittleFS.h>
+
+#define AA_FONT_SMALL "fonts/NSBold15" // 15 point Noto sans serif bold
+#define AA_FONT_LARGE "fonts/NSBold36" // 36 point Noto sans serif bold
 /***************************************************************************************
 **                          Load the libraries and settings
 ***************************************************************************************/
@@ -42,11 +46,13 @@
 
 // Additional functions
 #include "GfxUi.h"          // Attached to this sketch
-#include "SPIFFS_Support.h" // Attached to this sketch
 
+// Choose library to load
 #ifdef ESP8266
   #include <ESP8266WiFi.h>
-#else
+#elif defined(ARDUINO_ARCH_MBED) || defined(ARDUINO_ARCH_RP2040)
+  #include <WiFiNINA.h>
+#else // ESP32
   #include <WiFi.h>
 #endif
 
@@ -59,8 +65,6 @@
 #include <OpenWeather.h>  // Latest here: https://github.com/Bodmer/OpenWeather
 
 #include "NTP_Time.h"     // Attached to this sketch, see that tab for library needs
-
-#include "MoonPhase.h"
 
 /***************************************************************************************
 **                          Define the globals and class instances
@@ -100,34 +104,56 @@ int leftOffset(String text, String sub);
 int rightOffset(String text, String sub);
 int splitIndex(String text);
 
+bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* bitmap)
+{
+   // Stop further decoding as image is running off bottom of screen
+  if ( y >= tft.height() ) return 0;
+
+  // This function will clip the image block rendering automatically at the TFT boundaries
+  tft.pushImage(x, y, w, h, bitmap);
+
+  // Return 1 to decode next block
+  return 1;
+}
+
 /***************************************************************************************
 **                          Setup
 ***************************************************************************************/
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(250000);
 
   tft.begin();
+  tft.setRotation(0); // For 320x480 screen
   tft.fillScreen(TFT_BLACK);
 
-  SPIFFS.begin();
-  listFiles();
+  if (!LittleFS.begin()) {
+    Serial.println("Flash FS initialisation failed!");
+    while (1) yield(); // Stay here twiddling thumbs waiting
+  }
+  Serial.println("\nFlash FS available!");
 
-  // Enable if you want to erase SPIFFS, this takes some time!
+  // Enable if you want to erase LittleFS, this takes some time!
   // then disable and reload sketch to avoid reformatting on every boot!
-  #ifdef FORMAT_SPIFFS
+  #ifdef FORMAT_LittleFS
     tft.setTextDatum(BC_DATUM); // Bottom Centre datum
-    tft.drawString("Formatting SPIFFS, so wait!", 120, 195); SPIFFS.format();
+    tft.drawString("Formatting LittleFS, so wait!", 120, 195); LittleFS.format();
   #endif
 
+  TJpgDec.setJpgScale(1);
+  TJpgDec.setCallback(tft_output);
+  TJpgDec.setSwapBytes(true); // May need to swap the jpg colour bytes (endianess)
+
   // Draw splash screen
-  if (SPIFFS.exists("/splash/OpenWeather.jpg")   == true) ui.drawJpeg("/splash/OpenWeather.jpg",   0, 40);
+  if (LittleFS.exists("/splash/OpenWeather.jpg")   == true) {
+    TJpgDec.drawFsJpg(0, 40, "/splash/OpenWeather.jpg", LittleFS);
+  }
 
   delay(2000);
 
   // Clear bottom section of screen
   tft.fillRect(0, 206, 240, 320 - 206, TFT_BLACK);
 
-  tft.loadFont(AA_FONT_SMALL);
+  tft.loadFont(AA_FONT_SMALL, LittleFS);
   tft.setTextDatum(BC_DATUM); // Bottom Centre datum
   tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
 
@@ -143,11 +169,17 @@ void setup() {
   tft.drawString("Connecting to WiFi", 120, 240);
   tft.setTextPadding(240); // Pad next drawString() text to full width to over-write old text
 
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  // Call once for ESP32 and ESP8266
+  #if !defined(ARDUINO_ARCH_MBED)
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  #endif
 
   while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
     Serial.print(".");
+    #if defined(ARDUINO_ARCH_MBED) || defined(ARDUINO_ARCH_RP2040)
+      if (WiFi.status() != WL_CONNECTED) WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    #endif
+    delay(500);
   }
   Serial.println();
 
@@ -223,16 +255,12 @@ void updateData() {
   Serial.print(", Lon = "); Serial.println(longitude);
 #endif
 
-  //On the ESP8266 (only) the library by default uses BearSSL, another option is to use AXTLS
-  //For problems with ESP8266 stability, use AXTLS by adding a false parameter thus       vvvvv
-  //ow.getForecast(current, hourly, daily, api_key, latitude, longitude, units, language, false);
-
-  bool parsed = ow.getForecast(current, hourly, daily, api_key, latitude, longitude, units, language);
+  bool parsed = ow.getForecast(current, hourly, daily, api_key, latitude, longitude, units, language, true);
 
   if (parsed) Serial.println("Data points received");
   else Serial.println("Failed to get data points");
 
-  Serial.print("Free heap = "); Serial.println(ESP.getFreeHeap(), DEC);
+  //Serial.print("Free heap = "); Serial.println(ESP.getFreeHeap(), DEC);
 
   printWeather(); // For debug, turn on output with #define SERIAL_MESSAGES
 
@@ -250,7 +278,7 @@ void updateData() {
 
   if (parsed)
   {
-    tft.loadFont(AA_FONT_SMALL);
+    tft.loadFont(AA_FONT_SMALL, LittleFS);
     drawCurrentWeather();
     drawForecast();
     drawAstronomy();
@@ -258,7 +286,7 @@ void updateData() {
 
     // Update the temperature here so we don't need to keep
     // loading and unloading font which takes time
-    tft.loadFont(AA_FONT_LARGE);
+    tft.loadFont(AA_FONT_LARGE, LittleFS);
     tft.setTextDatum(TR_DATUM);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
 
@@ -285,7 +313,7 @@ void updateData() {
 **                          Update progress bar
 ***************************************************************************************/
 void drawProgress(uint8_t percentage, String text) {
-  tft.loadFont(AA_FONT_SMALL);
+  tft.loadFont(AA_FONT_SMALL, LittleFS);
   tft.setTextDatum(BC_DATUM);
   tft.setTextColor(TFT_ORANGE, TFT_BLACK);
   tft.setTextPadding(240);
@@ -301,7 +329,7 @@ void drawProgress(uint8_t percentage, String text) {
 **                          Draw the clock digits
 ***************************************************************************************/
 void drawTime() {
-  tft.loadFont(AA_FONT_LARGE);
+  tft.loadFont(AA_FONT_LARGE, LittleFS);
 
   // Convert UTC to local time, returns zone code in tz1_Code, e.g "GMT"
   time_t local_time = TIMEZONE.toLocal(now(), &tz1_Code);
@@ -347,6 +375,8 @@ void drawCurrentWeather() {
 
   //uint32_t dt = millis();
   ui.drawBmp("/icon/" + weatherIcon + ".bmp", 0, 53);
+
+
   //Serial.print("Icon draw time = "); Serial.println(millis()-dt);
 
   // Weather Text
@@ -387,7 +417,7 @@ void drawCurrentWeather() {
 
   if (units == "imperial")
   {
-    weatherText = current->pressure * 0.02953;
+    weatherText = current->pressure;
     weatherText += " in";
   }
   else
