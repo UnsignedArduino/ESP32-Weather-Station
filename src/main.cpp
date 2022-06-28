@@ -146,16 +146,21 @@ void setup() {
 **                          Loop
 ***************************************************************************************/
 void loop() {
+  char cmd = 0;
+  if (Serial.available()) {
+    cmd = Serial.read();
+  }
 
   // Check if we should update weather information
-  if (booted || (millis() - lastDownloadUpdate > 1000UL * UPDATE_INTERVAL_SECS))
+  if (booted || (millis() - lastDownloadUpdate > 1000UL * UPDATE_INTERVAL_SECS) ||
+      cmd == 'w')
   {
     updateData();
     lastDownloadUpdate = millis();
   }
 
   // If minute has changed then request new time from NTP server
-  if (booted || minute() != lastMinute)
+  if (booted || minute() != lastMinute || cmd == 't')
   {
     // Update displayed time first as we may have to wait for a response
     drawTime();
