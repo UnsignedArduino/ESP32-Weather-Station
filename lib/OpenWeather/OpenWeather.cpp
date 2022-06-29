@@ -681,8 +681,8 @@ void OW_Weather::partialDataSet(const char *val) {
     if (currentKey == "humidity") current->humidity = value.toInt();
     //else
     //if (currentKey == "dew_point") current->dew_point = value.toFloat();
-    //else
-    //if (currentKey == "uvi") current->uvi = value.toFloat();
+    else
+    if (currentKey == "uvi") current->uvi = value.toFloat();
     else
     if (currentKey == "clouds") current->clouds = value.toInt();
     //else

@@ -404,6 +404,33 @@ void drawCurrentWeather() {
   tft.setTextPadding(tft.textWidth("888 m/s NW")); // Max string length?
   tft.drawString(weatherText, 10 + windOffset, 170);
 
+  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+  weatherText = String(current->uvi, 0);
+
+  const unsigned int uvOffset = tft.drawString("UV index: ", 10, 188);
+
+  // https://www.epa.gov/sunsafety/uv-index-scale-0
+  if (current->uvi >= 11) {
+    tft.setTextColor(TFT_PURPLE, TFT_BLACK);
+    weatherText += " (extreme)";
+  } else if (current->uvi >= 8) {
+    tft.setTextColor(TFT_RED, TFT_BLACK);
+    weatherText += " (very high)";
+  } else if (current->uvi >= 6) {
+    tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+    weatherText += " (high)";
+  } else if (current->uvi >= 3) {
+    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+    weatherText += " (moderate)";
+  } else {
+    tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    weatherText += " (low)";
+  }
+
+  tft.setTextDatum(TL_DATUM);
+  tft.setTextPadding(tft.textWidth("11")); // Max string length?
+  tft.drawString(weatherText, 10 + uvOffset, 188);
+
   // if (units == "imperial")
   // {
   //   weatherText = current->pressure * 0.02953;
