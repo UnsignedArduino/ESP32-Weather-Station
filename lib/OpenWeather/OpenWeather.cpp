@@ -39,6 +39,7 @@ bool OW_Weather::getForecast(OW_current *current, OW_hourly *hourly, OW_daily *d
   hourly_index = 0;
   daily_index = 0;
   Secure = secure;
+  gettingExtra = false;
 
   // Local copies of structure pointers, the structures are filled during parsing
   this->current  = current;
@@ -64,12 +65,25 @@ bool OW_Weather::getForecast(OW_current *current, OW_hourly *hourly, OW_daily *d
   return result;
 }
 
+bool OW_Weather::getExtra(OW_extra *extra, String api_key, String latitude, String longitude,
+                          String units, String language) {
+  gettingExtra = true;
+
+  this->extra = extra;
+
+  String url = "https://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude + "&units=" + units + "&lang=" + language + "&appid=" + api_key;
+
+  bool result = parseRequest(url);
+
+  this->extra = nullptr;
+  return result;
+}
+
 /***************************************************************************************
 ** Function name:           partialDataSet
 ** Description:             Set requested data set to partial (true) or full (false)
 ***************************************************************************************/
 void OW_Weather::partialDataSet(bool partialSet) {
-  
   this->partialSet = partialSet;
 }
 
@@ -454,8 +468,12 @@ void OW_Weather::error( const char *message ) {
 ***************************************************************************************/
 void OW_Weather::value(const char *val)
 {
-  if (!partialSet) fullDataSet(val);
-  else partialDataSet(val);
+  if (gettingExtra) {
+    extraDataSet(val);
+  } else {
+    if (!partialSet) fullDataSet(val);
+    else partialDataSet(val);
+  }
 }
 
 /***************************************************************************************
@@ -463,7 +481,6 @@ void OW_Weather::value(const char *val)
 ** Description:             Collects full data set
 ***************************************************************************************/
 void OW_Weather::fullDataSet(const char *val) {
-
    String value = val;
 
   // Start of JSON
@@ -803,4 +820,19 @@ void OW_Weather::partialDataSet(const char *val) {
     return;
   }
 
+}
+
+void OW_Weather::extraDataSet(const char *val) {
+  String value = val;
+
+  // Current forecast - no array index - short path
+  if (currentParent == "main") {
+    data_set = "main";
+    if (currentKey == "temp_min") extra->temp_min = value.toFloat();
+    else if (currentKey == "temp_max") extra->temp_max = value.toFloat();
+  } else if (currentParent == "sys") {
+    if (currentKey == "country") extra->country = value;
+  } else {
+    if (currentKey == "name") extra->name = value;
+  }
 }

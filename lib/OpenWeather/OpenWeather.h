@@ -38,6 +38,8 @@ class OW_Weather: public JsonListener {
     bool getForecast(OW_current *current, OW_hourly *hourly, OW_daily  *daily,
                      String api_key, String latitude, String longitude,
                      String units, String language, bool secure = true);
+    bool getExtra(OW_extra *extra, String api_key, String latitude, String longitude,
+                  String units, String language);
 
     // Called by library (or user sketch), sends a GET request to a https (secure) url
     bool parseRequest(String url); // and parses response, returns true if no parse errors
@@ -79,6 +81,7 @@ class OW_Weather: public JsonListener {
     void fullDataSet(const char *value);    // Populate structure with full data set
     void partialDataSet(const char *value); // Populate structure with minimal data set
 
+    void extraDataSet(const char *value);
 
   private: // Variables used internal to library
 
@@ -89,6 +92,7 @@ class OW_Weather: public JsonListener {
     // a pointer passed via the library getForecast() call the value() function
     // is then used to populate the structs with values
     OW_current  *current;  // pointer provided by sketch to the OW_current struct
+    OW_extra    *extra;
     OW_hourly   *hourly;   // pointer provided by sketch to the OW_hourly struct
     OW_daily    *daily;    // pointer provided by sketch to the OW_daily struct
 
@@ -104,6 +108,7 @@ class OW_Weather: public JsonListener {
                             // (does not mean data values gathered are good!)
 
     bool     partialSet = false;    // Set true for partial data set acquisition
+    bool gettingExtra = false;
 
     String   currentParent; // Current object e.g. "daily"
     uint16_t objectLevel;   // Object level, increments for new object, decrements at end

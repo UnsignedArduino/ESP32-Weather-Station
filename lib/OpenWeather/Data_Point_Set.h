@@ -42,6 +42,13 @@ typedef struct OW_current {
 
 } OW_current;
 
+typedef struct OW_extra {
+  float temp_min = 0;
+  float temp_max = 0;
+  String name;
+  String country;
+} OW_extra;
+
 /***************************************************************************************
 ** Description:   Structure for hourly weather
 ***************************************************************************************/

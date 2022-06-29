@@ -62,6 +62,8 @@
 
 #include "MoonPhase.h"
 
+#define SERIAL_MESSAGES
+
 /***************************************************************************************
 **                          Define the globals and class instances
 ***************************************************************************************/
@@ -71,6 +73,7 @@ TFT_eSPI tft = TFT_eSPI();             // Invoke custom library
 OW_Weather ow;      // Weather forecast library instance
 
 OW_current *current; // Pointers to structs that temporarily holds weather data
+OW_extra   *extra;
 OW_hourly  *hourly;  // Not used
 OW_daily   *daily;
 
@@ -194,6 +197,7 @@ void updateData() {
 
   // Create the structures that hold the retrieved weather
   current = new OW_current;
+  extra = new OW_extra;
   daily =   new OW_daily;
   hourly =  new OW_hourly;
 
@@ -211,6 +215,7 @@ void updateData() {
   //ow.getForecast(current, hourly, daily, api_key, latitude, longitude, units, language, false);
 
   bool parsed = ow.getForecast(current, hourly, daily, api_key, latitude, longitude, units, language);
+  parsed = parsed && ow.getExtra(extra, api_key, latitude, longitude, units, language);
 
   if (parsed) Serial.println("Data points received");
   else Serial.println("Failed to get data points");
@@ -662,6 +667,12 @@ void printWeather(void)
     Serial.print("temp_min           : "); Serial.println(daily->temp_min[i]);
     Serial.println();
   }
+
+  Serial.println("#################  Extra info  ################\n");
+  Serial.print("temp_min           : "); Serial.println(extra->temp_min);
+  Serial.print("temp_max           : "); Serial.println(extra->temp_max);
+  Serial.print("name               : "); Serial.println(extra->name);
+  Serial.print("country            : "); Serial.println(extra->country);
 
 #endif
 }
