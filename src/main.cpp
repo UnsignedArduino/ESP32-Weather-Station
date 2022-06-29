@@ -362,6 +362,18 @@ void drawCurrentWeather() {
   if (units == "metric") degreeSize = tft.drawString("oC", 110 + tempSize, 113);
   else degreeSize = tft.drawString("oF", 110 + tempSize, 113);
 
+  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+  const unsigned int humidityOffset = tft.drawString("Humidity: ", 105, 145);
+
+  String humidity = "";
+  humidity += current->humidity;
+  humidity += "%";
+
+  tft.setTextDatum(TL_DATUM);
+  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+  tft.setTextPadding(tft.textWidth("100%"));
+  tft.drawString(humidity, 105 + humidityOffset, 145);
+
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
 
   weatherText = String(extra->temp_max, 0);
@@ -406,18 +418,6 @@ void drawCurrentWeather() {
   // tft.setTextDatum(TR_DATUM);
   // tft.setTextPadding(tft.textWidth(" 8888hPa")); // Max string length?
   // tft.drawString(weatherText, 230, 148);
-
-  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-  const unsigned int humidityOffset = tft.drawString("Humidity: ", 10, 187);
-
-  String humidity = "";
-  humidity += current->humidity;
-  humidity += "%";
-
-  tft.setTextDatum(TL_DATUM);
-  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-  tft.setTextPadding(tft.textWidth("100%"));
-  tft.drawString(humidity, 10 + humidityOffset, 187);
 
   drawSeparator(165);
 
