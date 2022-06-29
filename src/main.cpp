@@ -351,14 +351,24 @@ void drawCurrentWeather() {
   tft.setTextPadding(tft.textWidth(" -88")); // Max width of values
 
   weatherText = String(current->temp, 0);  // Make it integer temperature
-  const int tempSize = tft.drawString(weatherText, 105, 111); //  + "°" symbol is big... use o in small font
+  const unsigned int tempSize = tft.drawString(weatherText, 105, 111); //  + "°" symbol is big... use o in small font
   tft.unloadFont();
 
   tft.loadFont(AA_FONT_SMALL);
 
+  unsigned int degreeSize;
+
   tft.setTextPadding(0);
-  if (units == "metric") tft.drawString("oC", 110 + tempSize, 113);
-  else  tft.drawString("oF", 110 + tempSize, 113);
+  if (units == "metric") degreeSize = tft.drawString("oC", 110 + tempSize, 113);
+  else degreeSize = tft.drawString("oF", 110 + tempSize, 113);
+
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+
+  weatherText = String(extra->temp_max, 0);
+  tft.drawString(weatherText, 110 + tempSize + degreeSize + 5, 113);
+
+  weatherText = String(extra->temp_min, 0);
+  tft.drawString(weatherText, 110 + tempSize + degreeSize + 5, 129);
 
   drawSeparator(65);
 
