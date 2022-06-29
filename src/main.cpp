@@ -156,6 +156,7 @@ void loop() {
       cmd == 'w')
   {
     updateData();
+    drawTime();
     lastDownloadUpdate = millis();
   }
 
@@ -186,10 +187,10 @@ void updateData() {
   // booted = false; // Test only
 
   if (booted) drawProgress(40, "Updating time...");
-  else fillSegment(22, 22, 0, 0, 12, TFT_NAVY);
+  else fillSegment(225, 15, 0, 0, 12, TFT_NAVY);
 
   if (booted) drawProgress(60, "Updating weather...");
-  else fillSegment(22, 22, 0, 180, 12, TFT_NAVY);
+  else fillSegment(225, 15, 0, 180, 12, TFT_NAVY);
 
   // Create the structures that hold the retrieved weather
   current = new OW_current;
@@ -226,13 +227,14 @@ void updateData() {
   }
   else
   {
-    fillSegment(22, 22, 0, 360, 12, TFT_NAVY);
+    fillSegment(225, 15, 0, 360, 12, TFT_NAVY);
     delay(2000);
-    fillSegment(22, 22, 0, 360, 12, TFT_BLACK);
+    fillSegment(225, 15, 0, 360, 12, TFT_BLACK);
   }
 
   if (parsed)
   {
+    tft.fillScreen(TFT_BLACK);
     tft.loadFont(AA_FONT_SMALL);
     drawCurrentWeather();
     drawForecast();
@@ -286,8 +288,6 @@ void drawTime() {
   tft.setTextColor(TFT_YELLOW, TFT_BLACK);
   tft.setTextPadding(tft.textWidth(" 44:44 "));  // String width + margin
   tft.drawString(timeNow, 10, 10);
-
-  drawSeparator(65);
 
   tft.setTextPadding(0);
 
@@ -352,16 +352,28 @@ void drawCurrentWeather() {
   tft.setTextPadding(0);
   if (units == "metric") tft.drawString("oC", 110 + tempSize, 97);
   else  tft.drawString("oF", 110 + tempSize, 97);
- 
-  // tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-  // weatherText = String(current->wind_speed, 0);
 
-  // if (units == "metric") weatherText += " m/s";
-  // else weatherText += " mph";
+  drawSeparator(65);
 
-  // tft.setTextDatum(TC_DATUM);
-  // tft.setTextPadding(tft.textWidth("888 m/s")); // Max string length?
-  // tft.drawString(weatherText, 124, 148);
+  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+  weatherText = String(current->wind_speed, 0);
+
+  if (units == "metric") weatherText += " m/s";
+  else weatherText += " mph ";
+
+  int windAngle = (current->wind_deg + 22.5) / 45;
+  if (windAngle > 7) windAngle = 0;
+  String wind[] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW" };
+  // ui.drawBmp("/wind/" + wind[windAngle] + ".bmp", 101, 98);
+  weatherText += wind[windAngle];
+
+  const unsigned int windOffset = tft.drawString("Wind: ", 10, 170);
+
+  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+
+  tft.setTextDatum(TL_DATUM);
+  tft.setTextPadding(tft.textWidth("888 m/s NW")); // Max string length?
+  tft.drawString(weatherText, 10 + windOffset, 170);
 
   // if (units == "imperial")
   // {
@@ -378,10 +390,17 @@ void drawCurrentWeather() {
   // tft.setTextPadding(tft.textWidth(" 8888hPa")); // Max string length?
   // tft.drawString(weatherText, 230, 148);
 
-  // int windAngle = (current->wind_deg + 22.5) / 45;
-  // if (windAngle > 7) windAngle = 0;
-  // String wind[] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW" };
-  // ui.drawBmp("/wind/" + wind[windAngle] + ".bmp", 101, 98);
+  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+  const unsigned int humidityOffset = tft.drawString("Humidity: ", 10, 187);
+
+  String humidity = "";
+  humidity += current->humidity;
+  humidity += "%";
+
+  tft.setTextDatum(TL_DATUM);
+  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+  tft.setTextPadding(tft.textWidth("100%"));
+  tft.drawString(humidity, 10 + humidityOffset, 187);
 
   drawSeparator(165);
 
@@ -394,6 +413,8 @@ void drawCurrentWeather() {
 ***************************************************************************************/
 // draws the three forecast columns
 void drawForecast() {
+  drawSeparator(231);
+
   int8_t dayIndex = 1;
 
   drawForecastDetail(  8, 250, dayIndex++);
