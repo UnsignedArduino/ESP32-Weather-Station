@@ -331,11 +331,13 @@ void drawCurrentWeather() {
   tft.setTextDatum(TL_DATUM);
   tft.setTextColor(TFT_ORANGE, TFT_BLACK);
 
+  tft.drawString(extra->name + ", " + extra->country, 105, 75);
+
   // int splitPoint = 0;
   // splitPoint = splitIndex(weatherText);
 
   // tft.setTextPadding(xpos - 100);  // xpos - icon width
-  /*if (splitPoint) */tft.drawString(weatherText/*.substring(0, splitPoint)*/, 105, 75);
+  /*if (splitPoint) */tft.drawString(weatherText/*.substring(0, splitPoint)*/, 105, 91);
   //else tft.drawString(" ", 55, 81);
   // tft.drawString(weatherText.substring(splitPoint), xpos, 83);
 
@@ -349,14 +351,14 @@ void drawCurrentWeather() {
   tft.setTextPadding(tft.textWidth(" -88")); // Max width of values
 
   weatherText = String(current->temp, 0);  // Make it integer temperature
-  const int tempSize = tft.drawString(weatherText, 105, 95); //  + "°" symbol is big... use o in small font
+  const int tempSize = tft.drawString(weatherText, 105, 111); //  + "°" symbol is big... use o in small font
   tft.unloadFont();
 
   tft.loadFont(AA_FONT_SMALL);
 
   tft.setTextPadding(0);
-  if (units == "metric") tft.drawString("oC", 110 + tempSize, 97);
-  else  tft.drawString("oF", 110 + tempSize, 97);
+  if (units == "metric") tft.drawString("oC", 110 + tempSize, 113);
+  else  tft.drawString("oF", 110 + tempSize, 113);
 
   drawSeparator(65);
 
