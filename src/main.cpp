@@ -236,22 +236,7 @@ void updateData() {
     tft.loadFont(AA_FONT_SMALL);
     drawCurrentWeather();
     drawForecast();
-    drawAstronomy();
-    tft.unloadFont();
-
-    // Update the temperature here so we don't need to keep
-    // loading and unloading font which takes time
-    tft.loadFont(AA_FONT_LARGE);
-    tft.setTextDatum(TR_DATUM);
-    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-
-    // Font ASCII code 0xB0 is a degree symbol, but o used instead in small font
-    tft.setTextPadding(tft.textWidth(" -88")); // Max width of values
-
-    String weatherText = "";
-    weatherText = String(current->temp, 0);  // Make it integer temperature
-    tft.drawString(weatherText, 215, 95); //  + "°" symbol is big... use o in small font
-    tft.unloadFont();
+    // drawAstronomy();
   }
   else
   {
@@ -297,12 +282,12 @@ void drawTime() {
   if (minute(local_time) < 10) timeNow += "0";
   timeNow += minute(local_time);
 
-  tft.setTextDatum(BC_DATUM);
+  tft.setTextDatum(TL_DATUM);
   tft.setTextColor(TFT_YELLOW, TFT_BLACK);
   tft.setTextPadding(tft.textWidth(" 44:44 "));  // String width + margin
-  tft.drawString(timeNow, 120, 53);
+  tft.drawString(timeNow, 10, 10);
 
-  drawSeparator(51);
+  drawSeparator(65);
 
   tft.setTextPadding(0);
 
@@ -316,10 +301,10 @@ void drawCurrentWeather() {
   String date = "Updated: " + strDate(current->dt);
   String weatherText = "None";
 
-  tft.setTextDatum(BC_DATUM);
+  tft.setTextDatum(TL_DATUM);
   tft.setTextColor(TFT_ORANGE, TFT_BLACK);
   tft.setTextPadding(tft.textWidth(" Updated: Mmm 44 44:44 "));  // String width + margin
-  tft.drawString(date, 120, 16);
+  tft.drawString(date, 10, 45);
 
   String weatherIcon = "";
 
@@ -329,7 +314,7 @@ void drawCurrentWeather() {
   weatherIcon = getMeteoconIcon(current->id, true);
 
   //uint32_t dt = millis();
-  ui.drawBmp("/icon/" + weatherIcon + ".bmp", 0, 53);
+  ui.drawBmp("/icon/" + weatherIcon + ".bmp", 0, 65);
   //Serial.print("Icon draw time = "); Serial.println(millis()-dt);
 
   // Weather Text
@@ -338,57 +323,67 @@ void drawCurrentWeather() {
   else
     weatherText = current->description;
 
-  tft.setTextDatum(BR_DATUM);
+  tft.setTextDatum(TL_DATUM);
   tft.setTextColor(TFT_ORANGE, TFT_BLACK);
 
-  int splitPoint = 0;
-  int xpos = 235;
-  splitPoint =  splitIndex(weatherText);
+  // int splitPoint = 0;
+  // splitPoint = splitIndex(weatherText);
 
-  tft.setTextPadding(xpos - 100);  // xpos - icon width
-  if (splitPoint) tft.drawString(weatherText.substring(0, splitPoint), xpos, 69);
-  else tft.drawString(" ", xpos, 69);
-  tft.drawString(weatherText.substring(splitPoint), xpos, 86);
+  // tft.setTextPadding(xpos - 100);  // xpos - icon width
+  /*if (splitPoint) */tft.drawString(weatherText/*.substring(0, splitPoint)*/, 105, 75);
+  //else tft.drawString(" ", 55, 81);
+  // tft.drawString(weatherText.substring(splitPoint), xpos, 83);
 
+  tft.unloadFont();
+
+  tft.loadFont(AA_FONT_LARGE);
+  tft.setTextDatum(TL_DATUM);
   tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-  tft.setTextDatum(TR_DATUM);
+
+  // Font ASCII code 0xB0 is a degree symbol, but o used instead in small font
+  tft.setTextPadding(tft.textWidth(" -88")); // Max width of values
+
+  weatherText = String(current->temp, 0);  // Make it integer temperature
+  const int tempSize = tft.drawString(weatherText, 105, 95); //  + "°" symbol is big... use o in small font
+  tft.unloadFont();
+
+  tft.loadFont(AA_FONT_SMALL);
+
   tft.setTextPadding(0);
-  if (units == "metric") tft.drawString("oC", 237, 95);
-  else  tft.drawString("oF", 237, 95);
-
-  //Temperature large digits added in updateData() to save swapping font here
+  if (units == "metric") tft.drawString("oC", 110 + tempSize, 97);
+  else  tft.drawString("oF", 110 + tempSize, 97);
  
-  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-  weatherText = String(current->wind_speed, 0);
+  // tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+  // weatherText = String(current->wind_speed, 0);
 
-  if (units == "metric") weatherText += " m/s";
-  else weatherText += " mph";
+  // if (units == "metric") weatherText += " m/s";
+  // else weatherText += " mph";
 
-  tft.setTextDatum(TC_DATUM);
-  tft.setTextPadding(tft.textWidth("888 m/s")); // Max string length?
-  tft.drawString(weatherText, 124, 136);
+  // tft.setTextDatum(TC_DATUM);
+  // tft.setTextPadding(tft.textWidth("888 m/s")); // Max string length?
+  // tft.drawString(weatherText, 124, 148);
 
-  if (units == "imperial")
-  {
-    weatherText = current->pressure * 0.02953;
-    weatherText += " in";
-  }
-  else
-  {
-    weatherText = String(current->pressure, 0);
-    weatherText += " hPa";
-  }
+  // if (units == "imperial")
+  // {
+  //   weatherText = current->pressure * 0.02953;
+  //   weatherText += " in";
+  // }
+  // else
+  // {
+  //   weatherText = String(current->pressure, 0);
+  //   weatherText += " hPa";
+  // }
 
-  tft.setTextDatum(TR_DATUM);
-  tft.setTextPadding(tft.textWidth(" 8888hPa")); // Max string length?
-  tft.drawString(weatherText, 230, 136);
+  // tft.setTextDatum(TR_DATUM);
+  // tft.setTextPadding(tft.textWidth(" 8888hPa")); // Max string length?
+  // tft.drawString(weatherText, 230, 148);
 
-  int windAngle = (current->wind_deg + 22.5) / 45;
-  if (windAngle > 7) windAngle = 0;
-  String wind[] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW" };
-  ui.drawBmp("/wind/" + wind[windAngle] + ".bmp", 101, 86);
+  // int windAngle = (current->wind_deg + 22.5) / 45;
+  // if (windAngle > 7) windAngle = 0;
+  // String wind[] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW" };
+  // ui.drawBmp("/wind/" + wind[windAngle] + ".bmp", 101, 98);
 
-  drawSeparator(153);
+  drawSeparator(165);
 
   tft.setTextDatum(TL_DATUM); // Reset datum to normal
   tft.setTextPadding(0);      // Reset padding width to none
@@ -401,11 +396,10 @@ void drawCurrentWeather() {
 void drawForecast() {
   int8_t dayIndex = 1;
 
-  drawForecastDetail(  8, 171, dayIndex++);
-  drawForecastDetail( 66, 171, dayIndex++); // was 95
-  drawForecastDetail(124, 171, dayIndex++); // was 180
-  drawForecastDetail(182, 171, dayIndex  ); // was 180
-  drawSeparator(171 + 69);
+  drawForecastDetail(  8, 250, dayIndex++);
+  drawForecastDetail( 66, 250, dayIndex++); // was 95
+  drawForecastDetail(124, 250, dayIndex++); // was 180
+  drawForecastDetail(182, 250, dayIndex  ); // was 180
 }
 
 /***************************************************************************************
