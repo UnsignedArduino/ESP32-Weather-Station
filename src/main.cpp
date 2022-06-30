@@ -1,111 +1,49 @@
-//  Example from OpenWeather library: https://github.com/Bodmer/OpenWeather
-//  Adapted by Bodmer to use the TFT_eSPI library:  https://github.com/Bodmer/TFT_eSPI
-
-//  This sketch is compatible with the ESP8266 and ESP32
-
-//                           >>>  IMPORTANT  <<<
-//         Modify setup in All_Settings.h tab to configure your location etc
-
-//                >>>  EVEN MORE IMPORTANT TO PREVENT CRASHES <<<
-//>>>>>>  For ESP8266 set SPIFFS to at least 2Mbytes before uploading files  <<<<<<
-
-//  ESP8266/ESP32 pin connections to the TFT are defined in the TFT_eSPI library.
-
-//  Original by Daniel Eichhorn, see license at end of file.
-
-//#define SERIAL_MESSAGES // For serial output weather reports
-//#define SCREEN_SERVER   // For dumping screen shots from TFT
-//#define RANDOM_LOCATION // Test only, selects random weather location every refresh
-//#define FORMAT_SPIFFS   // Wipe SPIFFS and all files!
-
-// This sketch uses font files created from the Noto family of fonts as bitmaps
-// generated from these fonts may be freely distributed:
-// https://www.google.com/get/noto/
-
-// A processing sketch to create new fonts can be found in the Tools folder of TFT_eSPI
-// https://github.com/Bodmer/TFT_eSPI/tree/master/Tools/Create_Smooth_Font/Create_font
-// New fonts can be generated to include language specific characters. The Noto family
-// of fonts has an extensive character set coverage.
-
-// Json streaming parser (do not use IDE library manager version) to use is here:
-// https://github.com/Bodmer/JSON_Decoder
-
 #define AA_FONT_SMALL "fonts/NotoSansBold15" // 15 point sans serif bold
 #define AA_FONT_LARGE "fonts/NotoSansBold36" // 36 point sans serif bold
-/***************************************************************************************
-**                          Load the libraries and settings
-***************************************************************************************/
+
 #include <Arduino.h>
 
 #include <SPI.h>
-#include <TFT_eSPI.h> // https://github.com/Bodmer/TFT_eSPI
-
-// Additional functions
-#include "GfxUi.h"          // Attached to this sketch
-#include "SPIFFS_Support.h" // Attached to this sketch
-
-#ifdef ESP8266
-  #include <ESP8266WiFi.h>
-#else
-  #include <WiFi.h>
-#endif
-
-
-// check All_Settings.h for adapting to your needs
+#include <TFT_eSPI.h>
+#include "GfxUi.h"
+#include "SPIFFS_Support.h"
+#include <WiFi.h>
 #include "All_Settings.h"
-
-#include <JSON_Decoder.h> // https://github.com/Bodmer/JSON_Decoder
-
-#include <OpenWeather.h>  // Latest here: https://github.com/Bodmer/OpenWeather
-
-#include "NTP_Time.h"     // Attached to this sketch, see that tab for library needs
-
+#include <JSON_Decoder.h>
+#include <OpenWeather.h>
+#include "NTP_Time.h"
 #include "MoonPhase.h"
 
-#define SERIAL_MESSAGES
+TFT_eSPI tft = TFT_eSPI();
+GfxUi ui = GfxUi(&tft);
 
-/***************************************************************************************
-**                          Define the globals and class instances
-***************************************************************************************/
+OW_Weather ow;
 
-TFT_eSPI tft = TFT_eSPI();             // Invoke custom library
-
-OW_Weather ow;      // Weather forecast library instance
-
-OW_current *current; // Pointers to structs that temporarily holds weather data
+OW_current *current;
 OW_extra   *extra;
-OW_hourly  *hourly;  // Not used
+OW_hourly  *hourly;
 OW_daily   *daily;
 
-boolean booted = true;
-
-GfxUi ui = GfxUi(&tft); // Jpeg and bmpDraw functions TODO: pull outside of a class
+bool booting = true;
 
 long lastDownloadUpdate = millis();
 
-/***************************************************************************************
-**                          Declare prototypes
-***************************************************************************************/
-void updateData();
+bool updateData();
+void drawAtAGlance();
 void drawProgress(uint8_t percentage, String text);
 void drawTime();
-void drawCurrentWeather();
-void drawForecast();
-void drawForecastDetail(uint16_t x, uint16_t y, uint8_t dayIndex);
+void drawCurrentWeatherAtAGlance();
+void drawForecastAtAGlance();
+void drawForecastDetailAtAGlance(uint16_t x, uint16_t y, uint8_t dayIndex);
 const char* getMeteoconIcon(uint16_t id, bool today);
-void drawAstronomy();
 void drawSeparator(uint16_t y);
-void fillSegment(int x, int y, int start_angle, int sub_angle, int r, unsigned int colour);
-String strDate(time_t unixTime);
-String strTime(time_t unixTime);
-void printWeather(void);
-int leftOffset(String text, String sub);
 int rightOffset(String text, String sub);
-int splitIndex(String text);
+int leftOffset(String text, String sub);
+void fillSegment(int x, int y, int start_angle, int sub_angle, int r, unsigned int colour);
+void printWeather();
+String strTime(time_t unixTime);
+String strDate(time_t unixTime);
 
-/***************************************************************************************
-**                          Setup
-***************************************************************************************/
 void setup() {
   Serial.begin(9600);
 
@@ -113,18 +51,10 @@ void setup() {
   tft.fillScreen(TFT_BLACK);
 
   drawProgress(0, "Initializing filesystem...");
-
   SPIFFS.begin();
 
   drawProgress(10, "Initializing filesystem...");
   listFiles();
-
-  // Enable if you want to erase SPIFFS, this takes some time!
-  // then disable and reload sketch to avoid reformatting on every boot!
-  #ifdef FORMAT_SPIFFS
-    drawProgress(10, "Wiping filesystem...");
-    SPIFFS.format();
-  #endif
 
   drawProgress(20, "Connecting to WiFi...");
   
@@ -136,7 +66,6 @@ void setup() {
   }
   Serial.println();
 
-  // Fetch the time
   udp.begin(localPort);
   syncTime();
 
@@ -145,124 +74,99 @@ void setup() {
   ow.partialDataSet(true); // Collect a subset of the data available
 }
 
-/***************************************************************************************
-**                          Loop
-***************************************************************************************/
 void loop() {
   char cmd = 0;
   if (Serial.available()) {
     cmd = Serial.read();
   }
 
-  // Check if we should update weather information
-  if (booted || (millis() - lastDownloadUpdate > 1000UL * UPDATE_INTERVAL_SECS) ||
-      cmd == 'w')
-  {
-    updateData();
+  if (booting || 
+      (millis() - lastDownloadUpdate > 1000UL * UPDATE_INTERVAL_SECS) ||
+      cmd == 'w') {
+    if (!updateData()) {
+      Serial.println("Failed to get data, retrying in 1 minute!");
+      lastDownloadUpdate = millis() - 1000UL * (UPDATE_INTERVAL_SECS + 60);
+      return;
+    }
+    drawAtAGlance();
     drawTime();
     lastDownloadUpdate = millis();
   }
 
-  // If minute has changed then request new time from NTP server
-  if (booted || minute() != lastMinute || cmd == 't')
-  {
-    // Update displayed time first as we may have to wait for a response
+  if (booting || minute() != lastMinute || cmd == 't') {
     drawTime();
     lastMinute = minute();
-
-    // Request and synchronise the local clock
     syncTime();
-
-    #ifdef SCREEN_SERVER
-      screenServer();
-    #endif
   }
 
-  booted = false;
+  booting = false;
 }
 
-/***************************************************************************************
-**                          Fetch the weather data  and update screen
-***************************************************************************************/
-// Update the Internet based information and update screen
-void updateData() {
-  // booted = true;  // Test only
-  // booted = false; // Test only
+bool updateData() {
+  if (booting) {
+    drawProgress(40, "Updating time...");
+  } else {
+    fillSegment(225, 15, 0, 0, 12, TFT_NAVY);
+  }
 
-  if (booted) drawProgress(40, "Updating time...");
-  else fillSegment(225, 15, 0, 0, 12, TFT_NAVY);
+  if (current == nullptr) {
+    delete current;
+    delete extra;
+    delete hourly;
+    delete daily;
+  }
 
-  // Create the structures that hold the retrieved weather
   current = new OW_current;
   extra = new OW_extra;
-  daily =   new OW_daily;
-  hourly =  new OW_hourly;
+  daily = new OW_daily;
+  hourly = new OW_hourly;
 
-#ifdef RANDOM_LOCATION // Randomly choose a place on Earth to test icons etc
-  String latitude = "";
-  latitude = (random(180) - 90);
-  String longitude = "";
-  longitude = (random(360) - 180);
-  Serial.print("Lat = "); Serial.print(latitude);
-  Serial.print(", Lon = "); Serial.println(longitude);
-#endif
-
-  //On the ESP8266 (only) the library by default uses BearSSL, another option is to use AXTLS
-  //For problems with ESP8266 stability, use AXTLS by adding a false parameter thus       vvvvv
-  //ow.getForecast(current, hourly, daily, api_key, latitude, longitude, units, language, false);
-
-  if (booted) drawProgress(60, "Updating weather...");
-  else fillSegment(225, 15, 0, 120, 12, TFT_NAVY);
+  if (booting) {
+    drawProgress(60, "Updating weather...");
+  } else {
+    fillSegment(225, 15, 0, 120, 12, TFT_NAVY);
+  }
 
   bool parsed = ow.getForecast(current, hourly, daily, api_key, latitude, longitude, units, language);
 
-  if (booted) drawProgress(80, "Updating weather...");
-  else fillSegment(225, 15, 0, 240, 12, TFT_NAVY);
+  if (booting) {
+    drawProgress(80, "Updating weather...");
+  } else {
+    fillSegment(225, 15, 0, 240, 12, TFT_NAVY);
+  }
 
   parsed = parsed && ow.getExtra(extra, api_key, latitude, longitude, units, language);
 
-  if (parsed) Serial.println("Data points received");
-  else Serial.println("Failed to get data points");
+  if (parsed) {
+    Serial.println("Data received!");
+  } else {
+    Serial.println("Failed to get data points!");
+    return false;
+  }
 
-  Serial.print("Free heap = "); Serial.println(ESP.getFreeHeap(), DEC);
+  Serial.print("Free heap: "); Serial.println(ESP.getFreeHeap(), DEC);
 
-  printWeather(); // For debug, turn on output with #define SERIAL_MESSAGES
+  printWeather();
 
-  if (booted)
-  {
+  if (booting) {
     drawProgress(100, "Done!");
     delay(2000);
-    tft.fillScreen(TFT_BLACK);
-  }
-  else
-  {
+  } else {
     fillSegment(225, 15, 0, 360, 12, TFT_NAVY);
     delay(2000);
-    fillSegment(225, 15, 0, 360, 12, TFT_BLACK);
   }
 
-  if (parsed)
-  {
-    tft.fillScreen(TFT_BLACK);
-    tft.loadFont(AA_FONT_SMALL);
-    drawCurrentWeather();
-    drawForecast();
-    // drawAstronomy();
-  }
-  else
-  {
-    Serial.println("Failed to get weather");
-  }
-
-  // Delete to free up space
-  delete current;
-  delete hourly;
-  delete daily;
+  return true;
 }
 
-/***************************************************************************************
-**                          Update progress bar
-***************************************************************************************/
+void drawAtAGlance() {
+  tft.fillScreen(TFT_BLACK);
+
+  tft.loadFont(AA_FONT_SMALL);
+  drawCurrentWeatherAtAGlance();
+  drawForecastAtAGlance();
+}
+
 void drawProgress(uint8_t percentage, String text) {
   tft.loadFont(AA_FONT_SMALL);
   tft.setTextDatum(BC_DATUM);
@@ -276,9 +180,6 @@ void drawProgress(uint8_t percentage, String text) {
   tft.unloadFont();
 }
 
-/***************************************************************************************
-**                          Draw the clock digits
-***************************************************************************************/
 void drawTime() {
   tft.loadFont(AA_FONT_LARGE);
 
@@ -303,10 +204,7 @@ void drawTime() {
   tft.unloadFont();
 }
 
-/***************************************************************************************
-**                          Draw the current weather
-***************************************************************************************/
-void drawCurrentWeather() {
+void drawCurrentWeatherAtAGlance() {
   String date = "Updated: " + strDate(current->dt);
   String weatherText = "None";
 
@@ -456,26 +354,18 @@ void drawCurrentWeather() {
   tft.setTextPadding(0);      // Reset padding width to none
 }
 
-/***************************************************************************************
-**                          Draw the 4 forecast columns
-***************************************************************************************/
-// draws the three forecast columns
-void drawForecast() {
+void drawForecastAtAGlance() {
   drawSeparator(231);
 
   int8_t dayIndex = 1;
 
-  drawForecastDetail(  8, 250, dayIndex++);
-  drawForecastDetail( 66, 250, dayIndex++); // was 95
-  drawForecastDetail(124, 250, dayIndex++); // was 180
-  drawForecastDetail(182, 250, dayIndex  ); // was 180
+  drawForecastDetailAtAGlance(8, 250, dayIndex ++);
+  drawForecastDetailAtAGlance(66, 250, dayIndex ++);
+  drawForecastDetailAtAGlance(124, 250, dayIndex ++);
+  drawForecastDetailAtAGlance(182, 250, dayIndex  );
 }
 
-/***************************************************************************************
-**                          Draw 1 forecast column at x, y
-***************************************************************************************/
-// helper for the forecast columns
-void drawForecastDetail(uint16_t x, uint16_t y, uint8_t dayIndex) {
+void drawForecastDetailAtAGlance(uint16_t x, uint16_t y, uint8_t dayIndex) {
 
   if (dayIndex >= MAX_DAYS) return;
 
@@ -501,77 +391,7 @@ void drawForecastDetail(uint16_t x, uint16_t y, uint8_t dayIndex) {
   tft.setTextPadding(0); // Reset padding width to none
 }
 
-/***************************************************************************************
-**                          Draw Sun rise/set, Moon, cloud cover and humidity
-***************************************************************************************/
-void drawAstronomy() {
-
-  tft.setTextDatum(BC_DATUM);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.setTextPadding(tft.textWidth(" Last qtr "));
-
-  time_t local_time = TIMEZONE.toLocal(current->dt, &tz1_Code);
-  uint16_t y = year(local_time);
-  uint8_t  m = month(local_time);
-  uint8_t  d = day(local_time);
-  uint8_t  h = hour(local_time);
-  int      ip;
-  uint8_t icon = moon_phase(y, m, d, h, &ip);
-
-  tft.drawString(moonPhase[ip], 120, 319);
-  ui.drawBmp("/moon/moonphase_L" + String(icon) + ".bmp", 120 - 30, 318 - 16 - 60);
-
-  tft.setTextDatum(BC_DATUM);
-  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-  tft.setTextPadding(0); // Reset padding width to none
-  tft.drawString(sunStr, 40, 270);
-
-  tft.setTextDatum(BR_DATUM);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.setTextPadding(tft.textWidth(" 88:88 "));
-
-  String rising = strTime(current->sunrise) + " ";
-  int dt = rightOffset(rising, ":"); // Draw relative to colon to them aligned
-  tft.drawString(rising, 40 + dt, 290);
-
-  String setting = strTime(current->sunset) + " ";
-  dt = rightOffset(setting, ":");
-  tft.drawString(setting, 40 + dt, 305);
-
-  tft.setTextDatum(BC_DATUM);
-  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-  tft.drawString(cloudStr, 195, 260);
-
-  String cloudCover = "";
-  cloudCover += current->clouds;
-  cloudCover += "%";
-
-  tft.setTextDatum(BR_DATUM);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.setTextPadding(tft.textWidth(" 100%"));
-  tft.drawString(cloudCover, 210, 277);
-
-  tft.setTextDatum(BC_DATUM);
-  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-  tft.drawString(humidityStr, 195, 300 - 2);
-
-  String humidity = "";
-  humidity += current->humidity;
-  humidity += "%";
-
-  tft.setTextDatum(BR_DATUM);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.setTextPadding(tft.textWidth("100%"));
-  tft.drawString(humidity, 210, 315);
-
-  tft.setTextPadding(0); // Reset padding width to none
-}
-
-/***************************************************************************************
-**                          Get the icon file name from the index number
-***************************************************************************************/
-const char* getMeteoconIcon(uint16_t id, bool today)
-{
+const char* getMeteoconIcon(uint16_t id, bool today) {
   if ( today && id/100 == 8 && (current->dt < current->sunrise || current->dt > current->sunset)) id += 1000; 
 
   if (id/100 == 2) return "thunderstorm";
@@ -597,65 +417,23 @@ const char* getMeteoconIcon(uint16_t id, bool today)
   return "unknown";
 }
 
-/***************************************************************************************
-**                          Draw screen section separator line
-***************************************************************************************/
-// if you don't want separators, comment out the tft-line
 void drawSeparator(uint16_t y) {
   tft.drawFastHLine(10, y, 240 - 2 * 10, 0x4228);
 }
 
-/***************************************************************************************
-**                          Determine place to split a line line
-***************************************************************************************/
-// determine the "space" split point in a long string
-int splitIndex(String text)
-{
-  uint16_t index = 0;
-  while ( (text.indexOf(' ', index) >= 0) && ( index <= text.length() / 2 ) ) {
-    index = text.indexOf(' ', index) + 1;
-  }
-  if (index) index--;
-  return index;
-}
-
-/***************************************************************************************
-**                          Right side offset to a character
-***************************************************************************************/
-// Calculate coord delta from end of text String to start of sub String contained within that text
-// Can be used to vertically right align text so for example a colon ":" in the time value is always
-// plotted at same point on the screen irrespective of different proportional character widths,
-// could also be used to align decimal points for neat formatting
-int rightOffset(String text, String sub)
-{
+int rightOffset(String text, String sub) {
   int index = text.indexOf(sub);
   return tft.textWidth(text.substring(index));
 }
 
-/***************************************************************************************
-**                          Left side offset to a character
-***************************************************************************************/
-// Calculate coord delta from start of text String to start of sub String contained within that text
-// Can be used to vertically left align text so for example a colon ":" in the time value is always
-// plotted at same point on the screen irrespective of different proportional character widths,
-// could also be used to align decimal points for neat formatting
-int leftOffset(String text, String sub)
-{
+int leftOffset(String text, String sub) {
   int index = text.indexOf(sub);
   return tft.textWidth(text.substring(0, index));
 }
 
-/***************************************************************************************
-**                          Draw circle segment
-***************************************************************************************/
-// Draw a segment of a circle, centred on x,y with defined start_angle and subtended sub_angle
-// Angles are defined in a clockwise direction with 0 at top
-// Segment has radius r and it is plotted in defined colour
-// Can be used for pie charts etc, in this sketch it is used for wind direction
 #define DEG2RAD 0.0174532925 // Degrees to Radians conversion factor
 #define INC 2 // Minimum segment subtended angle and plotting angle increment (in degrees)
-void fillSegment(int x, int y, int start_angle, int sub_angle, int r, unsigned int colour)
-{
+void fillSegment(int x, int y, int start_angle, int sub_angle, int r, unsigned int colour) {
   // Calculate first pair of coordinates for segment start
   float sx = cos((start_angle - 90) * DEG2RAD);
   float sy = sin((start_angle - 90) * DEG2RAD);
@@ -677,12 +455,7 @@ void fillSegment(int x, int y, int start_angle, int sub_angle, int r, unsigned i
   }
 }
 
-/***************************************************************************************
-**                          Print the weather info to the Serial Monitor
-***************************************************************************************/
-void printWeather(void)
-{
-#ifdef SERIAL_MESSAGES
+void printWeather() {
   Serial.println("Weather from OpenWeather\n");
 
   Serial.println("############### Current weather ###############\n");
@@ -716,14 +489,9 @@ void printWeather(void)
   Serial.print("temp_max           : "); Serial.println(extra->temp_max);
   Serial.print("name               : "); Serial.println(extra->name);
   Serial.print("country            : "); Serial.println(extra->country);
-
-#endif
 }
-/***************************************************************************************
-**             Convert Unix time to a "local time" time string "12:34"
-***************************************************************************************/
-String strTime(time_t unixTime)
-{
+
+String strTime(time_t unixTime) {
   time_t local_time = TIMEZONE.toLocal(unixTime, &tz1_Code);
 
   String localTime = "";
@@ -737,11 +505,7 @@ String strTime(time_t unixTime)
   return localTime;
 }
 
-/***************************************************************************************
-**  Convert Unix time to a local date + time string "Oct 16 17:18", ends with newline
-***************************************************************************************/
-String strDate(time_t unixTime)
-{
+String strDate(time_t unixTime) {
   time_t local_time = TIMEZONE.toLocal(unixTime, &tz1_Code);
 
   String localDate = "";
@@ -753,45 +517,3 @@ String strDate(time_t unixTime)
 
   return localDate;
 }
-
-/**The MIT License (MIT)
-  Copyright (c) 2015 by Daniel Eichhorn
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYBR_DATUM HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-  SOFTWARE.
-  See more at http://blog.squix.ch
-*/
-
-//  Changes made by Bodmer:
-
-//  Minor changes to text placement and auto-blanking out old text with background colour padding
-//  Moon phase text added (not provided by OpenWeather)
-//  Forecast text lines are automatically split onto two lines at a central space (some are long!)
-//  Time is printed with colons aligned to tidy display
-//  Min and max forecast temperatures spaced out
-//  New smart splash startup screen and updated progress messages
-//  Display does not need to be blanked between updates
-//  Icons nudged about slightly to add wind direction + speed
-//  Barometric pressure added
-
-//  Adapted to use the OpenWeather library: https://github.com/Bodmer/OpenWeather
-//  Moon phase/rise/set (not provided by OpenWeather) replace with  and cloud cover humidity
-//  Created and added new 100x100 and 50x50 pixel weather icons, these are in the
-//  sketch data folder, press Ctrl+K to view
-//  Add moon icons, eliminate all downloads of icons (may lose server!)
-//  Adapted to use anti-aliased fonts, tweaked coords
-//  Added forecast for 4th day
-//  Added cloud cover and humidity in lieu of Moon rise/set
-//  Adapted to be compatible with ESP32
