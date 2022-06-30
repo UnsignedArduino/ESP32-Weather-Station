@@ -109,7 +109,7 @@ bool updateData() {
     fillSegment(225, 15, 0, 0, 12, TFT_NAVY);
   }
 
-  if (current == nullptr) {
+  if (current != nullptr) {
     delete current;
     delete extra;
     delete hourly;
