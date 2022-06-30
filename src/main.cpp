@@ -192,9 +192,6 @@ void updateData() {
   if (booted) drawProgress(40, "Updating time...");
   else fillSegment(225, 15, 0, 0, 12, TFT_NAVY);
 
-  if (booted) drawProgress(60, "Updating weather...");
-  else fillSegment(225, 15, 0, 180, 12, TFT_NAVY);
-
   // Create the structures that hold the retrieved weather
   current = new OW_current;
   extra = new OW_extra;
@@ -214,7 +211,14 @@ void updateData() {
   //For problems with ESP8266 stability, use AXTLS by adding a false parameter thus       vvvvv
   //ow.getForecast(current, hourly, daily, api_key, latitude, longitude, units, language, false);
 
+  if (booted) drawProgress(60, "Updating weather...");
+  else fillSegment(225, 15, 0, 120, 12, TFT_NAVY);
+
   bool parsed = ow.getForecast(current, hourly, daily, api_key, latitude, longitude, units, language);
+
+  if (booted) drawProgress(80, "Updating weather...");
+  else fillSegment(225, 15, 0, 240, 12, TFT_NAVY);
+
   parsed = parsed && ow.getExtra(extra, api_key, latitude, longitude, units, language);
 
   if (parsed) Serial.println("Data points received");
