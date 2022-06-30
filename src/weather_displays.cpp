@@ -32,7 +32,6 @@ void drawTime(TFT_eSPI tft) {
 
 void drawAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, OW_extra* extra) {
   tft.fillScreen(TFT_BLACK);
-  tft.loadFont(AA_FONT_SMALL);
   drawCurrentWeatherAtAGlance(tft, ui, current, extra);
   drawForecastAtAGlance(tft, ui, current, daily);
 }
@@ -41,6 +40,7 @@ void drawCurrentWeatherAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW
   String date = "Updated: " + strDate(current->dt);
   String weatherText = "None";
 
+  tft.loadFont(AA_FONT_SMALL);
   tft.setTextDatum(TL_DATUM);
   tft.setTextColor(TFT_ORANGE, TFT_BLACK);
   tft.setTextPadding(tft.textWidth(" Updated: Mmm 44 44:44 "));  // String width + margin
@@ -185,6 +185,7 @@ void drawCurrentWeatherAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW
 
   tft.setTextDatum(TL_DATUM); // Reset datum to normal
   tft.setTextPadding(0);      // Reset padding width to none
+  tft.unloadFont();
 }
 
 void drawForecastAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily) {
@@ -192,17 +193,18 @@ void drawForecastAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily
 
   int8_t dayIndex = 1;
 
+  tft.loadFont(AA_FONT_SMALL);
   drawForecastDetailAtAGlance(tft, ui, current, daily, 8, 250, dayIndex ++);
   drawForecastDetailAtAGlance(tft, ui, current, daily, 66, 250, dayIndex ++);
   drawForecastDetailAtAGlance(tft, ui, current, daily, 124, 250, dayIndex ++);
   drawForecastDetailAtAGlance(tft, ui, current, daily, 182, 250, dayIndex);
+  tft.unloadFont();
 }
 
 void drawForecastDetailAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex) {
-
   if (dayIndex >= MAX_DAYS) return;
 
-  String day  = shortDOW[weekday(TIMEZONE.toLocal(daily->dt[dayIndex], &tz1_Code))];
+  String day = shortDOW[weekday(TIMEZONE.toLocal(daily->dt[dayIndex], &tz1_Code))];
   day.toUpperCase();
 
   tft.setTextDatum(BC_DATUM);
@@ -210,12 +212,17 @@ void drawForecastDetailAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW
   tft.setTextColor(TFT_ORANGE, TFT_BLACK);
   tft.setTextPadding(tft.textWidth("WWW"));
   tft.drawString(day, x + 25, y);
+  Serial.print("Day: ");
+  Serial.print(day);
 
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setTextPadding(tft.textWidth("-88   -88"));
   String highTemp = String(daily->temp_max[dayIndex], 0);
   String lowTemp  = String(daily->temp_min[dayIndex], 0);
   tft.drawString(highTemp + " " + lowTemp, x + 25, y + 17);
+
+  Serial.print(" high: "); Serial.print(highTemp);
+  Serial.print(" low: "); Serial.println(lowTemp);
 
   String weatherIcon = getMeteoconIcon(current, daily->id[dayIndex], false);
 
