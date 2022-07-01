@@ -57,24 +57,24 @@ typedef struct OW_hourly {
   // hourly
   uint32_t dt[MAX_HOURS] = { 0 };
   float    temp[MAX_HOURS] = { 0 };
-  float    feels_like[MAX_HOURS] = { 0 };
-  float    pressure[MAX_HOURS] = { 0 };
-  uint8_t  humidity[MAX_HOURS] = { 0 };
-  float    dew_point[MAX_HOURS] = { 0 };
-  uint8_t  clouds[MAX_HOURS] = { 0 };
-  float    wind_speed[MAX_HOURS] = { 0 };
-  float    wind_gust[MAX_HOURS] = { 0 };
-  uint16_t wind_deg[MAX_HOURS] = { 0 };
-  float    rain[MAX_HOURS] = { 0 };
-  float    snow[MAX_HOURS] = { 0 };
+  // float    feels_like[MAX_HOURS] = { 0 };
+  // float    pressure[MAX_HOURS] = { 0 };
+  // uint8_t  humidity[MAX_HOURS] = { 0 };
+  // float    dew_point[MAX_HOURS] = { 0 };
+  // uint8_t  clouds[MAX_HOURS] = { 0 };
+  // float    wind_speed[MAX_HOURS] = { 0 };
+  // float    wind_gust[MAX_HOURS] = { 0 };
+  // uint16_t wind_deg[MAX_HOURS] = { 0 };
+  // float    rain[MAX_HOURS] = { 0 };
+  // float    snow[MAX_HOURS] = { 0 };
 
   // hourly.weather
   uint16_t id[MAX_HOURS] = { 0 };
-  String   main[MAX_HOURS];
-  String   description[MAX_HOURS];
-  String   icon[MAX_HOURS];
-  float    pop[MAX_HOURS];
-  float    rain1h[MAX_HOURS];
+  // String   main[MAX_HOURS];
+  // String   description[MAX_HOURS];
+  // String   icon[MAX_HOURS];
+  // float    pop[MAX_HOURS];
+  // float    rain1h[MAX_HOURS];
 } OW_hourly;
 
 /***************************************************************************************

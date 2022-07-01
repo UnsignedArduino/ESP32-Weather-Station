@@ -72,13 +72,14 @@ void loop() {
       lastDownloadUpdate = millis() - 1000UL * (UPDATE_INTERVAL_SECS + 60);
       return;
     }
-    drawAtAGlance(tft, ui, current, daily, extra);
-    drawTime(tft);
+    // drawAtAGlance(tft, ui, current, daily, extra);
+    drawHourlyWeather(tft, ui, current, hourly, extra);
+    drawTime(tft, current);
     lastDownloadUpdate = millis();
   }
 
   if (booting || minute() != lastMinute || cmd == 't') {
-    drawTime(tft);
+    drawTime(tft, current);
     lastMinute = minute();
     syncTime();
   }

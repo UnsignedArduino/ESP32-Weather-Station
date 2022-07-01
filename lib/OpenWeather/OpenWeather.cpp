@@ -548,38 +548,38 @@ void OW_Weather::fullDataSet(const char *val) {
     else
     if (currentKey == "temp") hourly->temp[arrayIndex] = value.toFloat();
     else
-    if (currentKey == "feels_like") hourly->feels_like[arrayIndex] = value.toFloat();
-    else
-    if (currentKey == "pressure") hourly->pressure[arrayIndex] = value.toFloat();
-    else
-    if (currentKey == "humidity") hourly->humidity[arrayIndex] = value.toInt();
-    else
-    if (currentKey == "dew_point") hourly->dew_point[arrayIndex] = value.toFloat();
-    else
-    if (currentKey == "clouds") hourly->clouds[arrayIndex] = value.toInt();
-    else
-    if (currentKey == "wind_speed") hourly->wind_speed[arrayIndex] = value.toFloat();
-    else
-    if (currentKey == "wind_gust") hourly->wind_gust[arrayIndex] = value.toFloat();
-    else
-    if (currentKey == "wind_deg") hourly->wind_deg[arrayIndex] = (uint16_t)value.toInt();
-    else
-    if (currentKey == "rain") hourly->rain[arrayIndex] = value.toFloat();
-    else
-    if (currentKey == "snow") hourly->snow[arrayIndex] = value.toFloat();
-    else
+    // if (currentKey == "feels_like") hourly->feels_like[arrayIndex] = value.toFloat();
+    // else
+    // if (currentKey == "pressure") hourly->pressure[arrayIndex] = value.toFloat();
+    // else
+    // if (currentKey == "humidity") hourly->humidity[arrayIndex] = value.toInt();
+    // else
+    // if (currentKey == "dew_point") hourly->dew_point[arrayIndex] = value.toFloat();
+    // else
+    // if (currentKey == "clouds") hourly->clouds[arrayIndex] = value.toInt();
+    // else
+    // if (currentKey == "wind_speed") hourly->wind_speed[arrayIndex] = value.toFloat();
+    // else
+    // if (currentKey == "wind_gust") hourly->wind_gust[arrayIndex] = value.toFloat();
+    // else
+    // if (currentKey == "wind_deg") hourly->wind_deg[arrayIndex] = (uint16_t)value.toInt();
+    // else
+    // if (currentKey == "rain") hourly->rain[arrayIndex] = value.toFloat();
+    // else
+    // if (currentKey == "snow") hourly->snow[arrayIndex] = value.toFloat();
+    // else
 
     if (currentKey == "id") hourly->id[arrayIndex] = value.toInt();
-    else
-    if (currentKey == "main") hourly->main[arrayIndex] = value;
-    else
-    if (currentKey == "description") hourly->description[arrayIndex] = value;
-    else
-    if (currentKey == "icon") hourly->icon[arrayIndex] = value;
-    else
-    if (currentKey == "pop") hourly->pop[arrayIndex] = value.toFloat();
-    else
-    if (currentKey == "1h") hourly->rain1h[arrayIndex] = value.toFloat();
+    // else
+    // if (currentKey == "main") hourly->main[arrayIndex] = value;
+    // else
+    // if (currentKey == "description") hourly->description[arrayIndex] = value;
+    // else
+    // if (currentKey == "icon") hourly->icon[arrayIndex] = value;
+    // else
+    // if (currentKey == "pop") hourly->pop[arrayIndex] = value.toFloat();
+    // else
+    // if (currentKey == "1h") hourly->rain1h[arrayIndex] = value.toFloat();
 
     return;
   }
@@ -710,7 +710,7 @@ void OW_Weather::partialDataSet(const char *val) {
     return;
   }
 
-/*
+
   // Hourly forecast
   if (currentParent == "hourly") {
     data_set = "hourly";
@@ -721,38 +721,37 @@ void OW_Weather::partialDataSet(const char *val) {
     else
     if (currentKey == "temp") hourly->temp[arrayIndex] = value.toFloat();
     else
-    if (currentKey == "feels_like") hourly->feels_like[arrayIndex] = value.toFloat();
-    else
-    if (currentKey == "pressure") hourly->pressure[arrayIndex] = value.toFloat();
-    else
-    if (currentKey == "humidity") hourly->humidity[arrayIndex] = value.toInt();
-    else
-    if (currentKey == "dew_point") hourly->dew_point[arrayIndex] = value.toFloat();
-    else
-    if (currentKey == "clouds") hourly->clouds[arrayIndex] = value.toInt();
-    else
-    if (currentKey == "wind_speed") hourly->wind_speed[arrayIndex] = value.toFloat();
-    else
-    if (currentKey == "wind_gust") hourly->wind_gust[arrayIndex] = value.toFloat();
-    else
-    if (currentKey == "wind_deg") hourly->wind_deg[arrayIndex] = (uint16_t)value.toInt();
-    else
-    if (currentKey == "rain") hourly->rain[arrayIndex] = value.toFloat();
-    else
-    if (currentKey == "snow") hourly->snow[arrayIndex] = value.toFloat();
-    else
+    // if (currentKey == "feels_like") hourly->feels_like[arrayIndex] = value.toFloat();
+    // else
+    // if (currentKey == "pressure") hourly->pressure[arrayIndex] = value.toFloat();
+    // else
+    // if (currentKey == "humidity") hourly->humidity[arrayIndex] = value.toInt();
+    // else
+    // if (currentKey == "dew_point") hourly->dew_point[arrayIndex] = value.toFloat();
+    // else
+    // if (currentKey == "clouds") hourly->clouds[arrayIndex] = value.toInt();
+    // else
+    // if (currentKey == "wind_speed") hourly->wind_speed[arrayIndex] = value.toFloat();
+    // else
+    // if (currentKey == "wind_gust") hourly->wind_gust[arrayIndex] = value.toFloat();
+    // else
+    // if (currentKey == "wind_deg") hourly->wind_deg[arrayIndex] = (uint16_t)value.toInt();
+    // else
+    // if (currentKey == "rain") hourly->rain[arrayIndex] = value.toFloat();
+    // else
+    // if (currentKey == "snow") hourly->snow[arrayIndex] = value.toFloat();
+    // else
 
     if (currentKey == "id") hourly->id[arrayIndex] = value.toInt();
-    else
-    if (currentKey == "main") hourly->main[arrayIndex] = value;
-    else
-    if (currentKey == "description") hourly->description[arrayIndex] = value;
-    else
-    if (currentKey == "icon") hourly->icon[arrayIndex] = value;
+    // else
+    // if (currentKey == "main") hourly->main[arrayIndex] = value;
+    // else
+    // if (currentKey == "description") hourly->description[arrayIndex] = value;
+    // else
+    // if (currentKey == "icon") hourly->icon[arrayIndex] = value;
 
     return;
   }
-*/
 
   // Daily forecast
   if (currentParent == "daily") {

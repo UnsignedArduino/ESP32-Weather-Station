@@ -6,7 +6,7 @@
 // count sent by the server). So they determine the memory used during collection
 // of the data points.
 
-#define MAX_HOURS 6     // Maximum "hourly" forecast period, can be up 1 to 48
+#define MAX_HOURS 12     // Maximum "hourly" forecast period, can be up 1 to 48
                         // Hourly forecast not used by TFT_eSPI_OpenWeather example
 
 #define MAX_DAYS 5      // Maximum "daily" forecast periods can be 1 to 8 (Today + 7 days = 8 maximum)

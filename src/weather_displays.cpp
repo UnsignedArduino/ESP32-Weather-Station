@@ -6,7 +6,7 @@
 #include "weather_displays.h"
 #include "All_Settings.h"
 
-void drawTime(TFT_eSPI tft) {
+void drawTime(TFT_eSPI tft, OW_current* current) {
   tft.loadFont(AA_FONT_LARGE);
 
   // Convert UTC to local time, returns zone code in tz1_Code, e.g "GMT"
@@ -25,8 +25,15 @@ void drawTime(TFT_eSPI tft) {
   tft.setTextPadding(tft.textWidth(" 44:44 "));  // String width + margin
   tft.drawString(timeNow, 10, 10);
 
-  tft.setTextPadding(0);
+  String date = "Updated: " + strDate(current->dt);
+  String weatherText = "None";
 
+  tft.unloadFont();
+  tft.loadFont(AA_FONT_SMALL);
+  tft.setTextDatum(TL_DATUM);
+  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+  tft.setTextPadding(tft.textWidth("Updated: Mmm 44 44:44"));  // String width + margin
+  tft.drawString(date, 10, 45);
   tft.unloadFont();
 }
 
@@ -37,14 +44,9 @@ void drawAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily,
 }
 
 void drawCurrentWeatherAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_extra* extra) {
-  String date = "Updated: " + strDate(current->dt);
-  String weatherText = "None";
+  String weatherText;
 
   tft.loadFont(AA_FONT_SMALL);
-  tft.setTextDatum(TL_DATUM);
-  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-  tft.setTextPadding(tft.textWidth(" Updated: Mmm 44 44:44 "));  // String width + margin
-  tft.drawString(date, 10, 45);
 
   String weatherIcon = "";
 
@@ -117,7 +119,7 @@ void drawCurrentWeatherAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW
   weatherText = String(extra->temp_min, 0);
   tft.drawString(weatherText, 110 + tempSize + degreeSize + 5, 129);
 
-  drawSeparator(tft, 65);
+  drawHSeparator(tft, 65);
 
   tft.setTextColor(TFT_ORANGE, TFT_BLACK);
   weatherText = String(current->wind_speed, 0);
@@ -181,7 +183,7 @@ void drawCurrentWeatherAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW
   // tft.setTextPadding(tft.textWidth(" 8888hPa")); // Max string length?
   // tft.drawString(weatherText, 230, 148);
 
-  drawSeparator(tft, 165);
+  drawHSeparator(tft, 165);
 
   tft.setTextDatum(TL_DATUM); // Reset datum to normal
   tft.setTextPadding(0);      // Reset padding width to none
@@ -189,7 +191,7 @@ void drawCurrentWeatherAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW
 }
 
 void drawForecastAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily) {
-  drawSeparator(tft, 231);
+  drawHSeparator(tft, 231);
 
   int8_t dayIndex = 1;
 
@@ -231,6 +233,50 @@ void drawForecastDetailAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW
   tft.setTextPadding(0); // Reset padding width to none
 }
 
+void drawHourlyWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra) {
+  tft.fillScreen(TFT_BLACK);
+  tft.loadFont(AA_FONT_SMALL);
+
+  for (byte i = 0; i < MAX_HOURS; i ++) {
+    uint16_t x = 7 + (i % 4) * 57;
+    uint16_t y = 90 + (i / 4) * 80;
+    drawDetailHourlyWeather(tft, ui, current, hourly, extra, x, y, i);
+    drawHSeparator(tft, y - 25);
+    if (i % 4 > 0) {
+      drawVSeparator(tft, x - 3);
+    }
+  }
+
+  tft.unloadFont();
+}
+
+void drawDetailHourlyWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra, uint16_t x, uint16_t y, byte hrIndex) {
+  if (hrIndex >= MAX_HOURS) {
+    return;
+  }
+
+  String hr = strTime(hourly->dt[hrIndex]).substring(0, 2);
+
+  tft.setTextDatum(BL_DATUM);
+  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+  tft.setTextPadding(tft.textWidth("88"));
+  tft.drawString(hr, x, y);
+  Serial.print("Hour: ");
+  Serial.print(hr);
+
+  tft.setTextDatum(BR_DATUM);
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.setTextPadding(tft.textWidth("-88"));
+  String temp = String(hourly->temp[hrIndex], 0);
+  tft.drawString(temp, x + 50, y);
+
+  Serial.print(" temp: "); Serial.println(temp);
+
+  String weatherIcon = getMeteoconIcon(current, hourly->id[hrIndex], false);
+
+  ui.drawBmp("/icon50/" + weatherIcon + ".bmp", x, y);
+}
+
 const char* getMeteoconIcon(OW_current* current, uint16_t id, bool today) {
   if ( today && id/100 == 8 && (current->dt < current->sunrise || current->dt > current->sunset)) id += 1000; 
 
@@ -270,8 +316,12 @@ void drawProgress(TFT_eSPI tft, GfxUi ui, uint8_t percentage, String text) {
   tft.unloadFont();
 }
 
-void drawSeparator(TFT_eSPI tft, uint16_t y) {
+void drawHSeparator(TFT_eSPI tft, uint16_t y) {
   tft.drawFastHLine(10, y, 240 - 2 * 10, 0x4228);
+}
+
+void drawVSeparator(TFT_eSPI tft, uint16_t x) {
+  tft.drawFastVLine(x, 65, 320 - 75, 0x4228);
 }
 
 int rightOffset(TFT_eSPI tft, String text, String sub) {

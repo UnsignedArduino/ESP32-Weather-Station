@@ -6,7 +6,7 @@
 #define AA_FONT_SMALL "fonts/NotoSansBold15"
 #define AA_FONT_LARGE "fonts/NotoSansBold36"
 
-void drawTime(TFT_eSPI tft);
+void drawTime(TFT_eSPI tft, OW_current* current);
 
 void drawAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, OW_extra* extra);
 
@@ -14,10 +14,14 @@ void drawCurrentWeatherAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW
 void drawForecastAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily);
 void drawForecastDetailAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex);
 
+void drawHourlyWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra);
+void drawDetailHourlyWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra, uint16_t x, uint16_t y, byte hrIndex);
+
 const char* getMeteoconIcon(OW_current* current, uint16_t id, bool today);
 
 void drawProgress(TFT_eSPI tft, GfxUi ui, uint8_t percentage, String text);
-void drawSeparator(TFT_eSPI tft, uint16_t y);
+void drawHSeparator(TFT_eSPI tft, uint16_t y);
+void drawVSeparator(TFT_eSPI tft, uint16_t x);
 
 int rightOffset(TFT_eSPI tft, String text, String sub);
 int leftOffset(TFT_eSPI tft, String text, String sub);
