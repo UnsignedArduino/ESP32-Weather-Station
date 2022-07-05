@@ -30,12 +30,15 @@
 
 #include <Arduino.h>
 
+#define ENABLE_SERIAL_COMMANDS
+
 #define WIFI_SSID      "Your_SSID"
 #define WIFI_PASSWORD  "Your_password"
 
 #define TIMEZONE UK // See NTP_Time.h tab for other "Zone references", UK, usMT etc
 
-// Update every 15 minutes, up to 1000 request per day are free (viz average of ~40 per hour)
+// Up to 1000 request per day are free (average of ~40 per hour)
+// NOTE EACH UPDATE REQUIRES TWO API CALLS!!!
 const int UPDATE_INTERVAL_SECS = 15 * 60UL; // 15 minutes
 
 // Pins for the TFT interface are defined in the User_Config.h file inside the TFT_eSPI library

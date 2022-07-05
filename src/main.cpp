@@ -65,9 +65,11 @@ void setup() {
 
 void loop() {
   char cmd = 0;
+  #ifdef ENABLE_SERIAL_COMMANDS
   if (Serial.available()) {
     cmd = Serial.read();
   }
+  #endif
 
   if (booting || 
       (millis() - lastDownloadUpdate > 1000UL * UPDATE_INTERVAL_SECS) ||
@@ -136,6 +138,7 @@ void loop() {
     syncTime();
   }
 
+  #ifdef ENABLE_SERIAL_COMMANDS
   if (booting) {
     Serial.println("Available commands:");
     Serial.println("w: Update weather data and trigger redraw.");
@@ -144,6 +147,7 @@ void loop() {
     Serial.println("n: Next frame in carousel.");
     Serial.println("p: Previous frame in carousel.");
   }
+  #endif
 
   booting = false;
 }
