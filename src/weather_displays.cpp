@@ -25,7 +25,7 @@ void drawTime(TFT_eSPI tft, OW_current* current) {
   tft.setTextPadding(tft.textWidth(" 44:44 "));  // String width + margin
   tft.drawString(timeNow, 10, 10);
 
-  String date = "Updated: " + strDate(current->dt);
+  String date = "Updated: " + strDateAndTime(current->dt);
   String weatherText = "None";
 
   tft.unloadFont();
@@ -196,14 +196,14 @@ void drawForecastAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily
   int8_t dayIndex = 1;
 
   tft.loadFont(AA_FONT_SMALL);
-  drawForecastDetailAtAGlance(tft, ui, current, daily, 8, 250, dayIndex ++);
-  drawForecastDetailAtAGlance(tft, ui, current, daily, 66, 250, dayIndex ++);
-  drawForecastDetailAtAGlance(tft, ui, current, daily, 124, 250, dayIndex ++);
-  drawForecastDetailAtAGlance(tft, ui, current, daily, 182, 250, dayIndex);
+  drawDetailForecastAtAGlance(tft, ui, current, daily, 8, 250, dayIndex ++);
+  drawDetailForecastAtAGlance(tft, ui, current, daily, 66, 250, dayIndex ++);
+  drawDetailForecastAtAGlance(tft, ui, current, daily, 124, 250, dayIndex ++);
+  drawDetailForecastAtAGlance(tft, ui, current, daily, 182, 250, dayIndex);
   tft.unloadFont();
 }
 
-void drawForecastDetailAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex) {
+void drawDetailForecastAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex) {
   if (dayIndex >= MAX_DAYS) return;
 
   String day = shortDOW[weekday(TIMEZONE.toLocal(daily->dt[dayIndex], &tz1_Code))];
@@ -275,6 +275,62 @@ void drawDetailHourlyWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hou
   String weatherIcon = getMeteoconIcon(current, hourly->id[hrIndex], false);
 
   ui.drawBmp("/icon50/" + weatherIcon + ".bmp", x, y);
+}
+
+void drawForecastWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily) {
+  tft.fillScreen(TFT_BLACK);
+  tft.loadFont(AA_FONT_SMALL);
+
+  for (byte i = 0; i < MAX_DAYS; i ++) {
+    uint16_t x = 7 + (i % 4) * 57;
+    uint16_t y = 90 + (i / 4) * 120;
+    drawDetailForecastWeather(tft, ui, current, daily, x, y, i);
+    drawHSeparator(tft, y - 25);
+    if (i % 4 > 0) {
+      drawVSeparator(tft, x - 3);
+    }
+  }
+
+  tft.unloadFont();
+}
+
+void drawDetailForecastWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex) {
+  if (dayIndex >= MAX_DAYS) return;
+
+  String day = shortDOW[weekday(TIMEZONE.toLocal(daily->dt[dayIndex], &tz1_Code))];
+  day.toUpperCase();
+
+  tft.setTextDatum(BC_DATUM);
+
+  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+  tft.setTextPadding(tft.textWidth("WWW"));
+  tft.drawString(day, x + 25, y);
+  Serial.print("Day: ");
+  Serial.print(day);
+
+  String numDay = strDate(daily->dt[dayIndex]);
+  numDay.toUpperCase();
+
+  tft.setTextPadding(tft.textWidth("MMM DD"));
+  tft.drawString(numDay, x + 25, y + 17);
+  Serial.print(" (");
+  Serial.print(numDay);
+  Serial.print(") ");
+
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.setTextPadding(tft.textWidth("-88   -88"));
+  String highTemp = String(daily->temp_max[dayIndex], 0);
+  String lowTemp  = String(daily->temp_min[dayIndex], 0);
+  tft.drawString(highTemp + " " + lowTemp, x + 25, y + 34);
+
+  Serial.print(" high: "); Serial.print(highTemp);
+  Serial.print(" low: "); Serial.println(lowTemp);
+
+  String weatherIcon = getMeteoconIcon(current, daily->id[dayIndex], false);
+
+  ui.drawBmp("/icon50/" + weatherIcon + ".bmp", x, y + 35);
+
+  tft.setTextPadding(0); // Reset padding width to none
 }
 
 const char* getMeteoconIcon(OW_current* current, uint16_t id, bool today) {
@@ -371,6 +427,18 @@ String strTime(time_t unixTime) {
 }
 
 String strDate(time_t unixTime) {
+  time_t local_time = TIMEZONE.toLocal(unixTime, &tz1_Code);
+
+  String localDate = "";
+
+  localDate += monthShortStr(month(local_time));
+  localDate += " ";
+  localDate += day(local_time);
+
+  return localDate;
+}
+
+String strDateAndTime(time_t unixTime) {
   time_t local_time = TIMEZONE.toLocal(unixTime, &tz1_Code);
 
   String localDate = "";

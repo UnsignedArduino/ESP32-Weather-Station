@@ -73,7 +73,8 @@ void loop() {
       return;
     }
     // drawAtAGlance(tft, ui, current, daily, extra);
-    drawHourlyWeather(tft, ui, current, hourly, extra);
+    // drawHourlyWeather(tft, ui, current, hourly, extra);
+    drawForecastWeather(tft, ui, current, daily);
     drawTime(tft, current);
     lastDownloadUpdate = millis();
   }
@@ -148,9 +149,9 @@ void printWeather() {
   Serial.println("Weather from OpenWeather\n");
 
   Serial.println("############### Current weather ###############\n");
-  Serial.print("dt (time)          : "); Serial.println(strDate(current->dt));
-  Serial.print("sunrise            : "); Serial.println(strDate(current->sunrise));
-  Serial.print("sunset             : "); Serial.println(strDate(current->sunset));
+  Serial.print("dt (time)          : "); Serial.println(strDateAndTime(current->dt));
+  Serial.print("sunrise            : "); Serial.println(strDateAndTime(current->sunrise));
+  Serial.print("sunset             : "); Serial.println(strDateAndTime(current->sunset));
   Serial.print("main               : "); Serial.println(current->main);
   Serial.print("temp               : "); Serial.println(current->temp);
   Serial.print("humidity           : "); Serial.println(current->humidity);
@@ -166,7 +167,7 @@ void printWeather() {
 
   for (int i = 0; i < 5; i++)
   {
-    Serial.print("dt (time)          : "); Serial.println(strDate(daily->dt[i]));
+    Serial.print("dt (time)          : "); Serial.println(strDateAndTime(daily->dt[i]));
     Serial.print("id                 : "); Serial.println(daily->id[i]);
     Serial.print("temp_max           : "); Serial.println(daily->temp_max[i]);
     Serial.print("temp_min           : "); Serial.println(daily->temp_min[i]);
