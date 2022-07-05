@@ -22,6 +22,7 @@ OW_hourly* hourly;
 OW_daily* daily;
 
 bool booting = true;
+bool redraw = true;
 
 #define MAX_CAROUSEL_INDEX 2
 byte carouselIndex = 0;
@@ -76,6 +77,34 @@ void loop() {
       lastDownloadUpdate = millis() - 1000UL * (UPDATE_INTERVAL_SECS + 60);
       return;
     }
+    redraw = true;
+  }
+
+  if (cmd == 'r') {
+    Serial.println("Flag manual redraw");
+    redraw = true;
+  } else if (cmd == 'n') {
+    Serial.println("Incrementing carousel frame index by 1");
+    carouselIndex ++;
+    if (carouselIndex > MAX_CAROUSEL_INDEX) {
+      carouselIndex = 0;
+    }
+    redraw = true;
+  } else if (cmd == 'p') {
+    Serial.println("Decrementing carousel frame index by 1");
+    if (carouselIndex > 0) {
+      carouselIndex --;
+    } else {
+      carouselIndex = MAX_CAROUSEL_INDEX;
+    }
+    redraw = true;
+  }
+
+  if (redraw) {
+    Serial.println("Redraw flag is true");
+    redraw = false;
+    Serial.print("carouselIndex is ");
+    Serial.println(carouselIndex);
     switch (carouselIndex) {
       case 0: {
         Serial.println("Drawing at a glance frame");
@@ -101,9 +130,19 @@ void loop() {
   }
 
   if (booting || minute() != lastMinute || cmd == 't') {
+    Serial.println("Redrawing time");
     drawTime(tft, current, title);
     lastMinute = minute();
     syncTime();
+  }
+
+  if (booting) {
+    Serial.println("Available commands:");
+    Serial.println("w: Update weather data and trigger redraw.");
+    Serial.println("t: Update time and trigger redraw of time.");
+    Serial.println("r: Trigger redraw.");
+    Serial.println("n: Next frame in carousel.");
+    Serial.println("p: Previous frame in carousel.");
   }
 
   booting = false;

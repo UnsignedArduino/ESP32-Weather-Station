@@ -168,7 +168,7 @@ void decodeNTP(void)
       // We've received a packet, read the data from it
       udp.read(packetBuffer, NTP_PACKET_SIZE); // read the packet into the buffer
 
-      Serial.print("\nNTP response time was : ");
+      Serial.print("NTP response time was : ");
       Serial.print(500 - (waitTime - newRecvTime));
       Serial.println(" ms");
 
