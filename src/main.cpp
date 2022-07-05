@@ -110,8 +110,8 @@ void loop() {
     switch (carouselIndex) {
       case 0: {
         Serial.println("Drawing at a glance frame");
-        title = "At a glance";
-        drawAtAGlance(tft, ui, current, daily, extra);
+        title = "Weather now";
+        drawWeatherNow(tft, ui, current, daily, extra);
         break;
       }
       case 1: {
@@ -127,13 +127,13 @@ void loop() {
         break;
       }
     }
-    drawTime(tft, current, title);
+    drawTopBar(tft, current, title, carouselIndex, MAX_CAROUSEL_INDEX);
     lastDownloadUpdate = millis();
   }
 
   if (booting || minute() != lastMinute || cmd == 't') {
     Serial.println("Redrawing time");
-    drawTime(tft, current, title);
+    drawTopBar(tft, current, title, carouselIndex, MAX_CAROUSEL_INDEX);
     lastMinute = minute();
     syncTime();
   }

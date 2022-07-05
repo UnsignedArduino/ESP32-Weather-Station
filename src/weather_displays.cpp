@@ -6,7 +6,7 @@
 #include "weather_displays.h"
 #include "All_Settings.h"
 
-void drawTime(TFT_eSPI tft, OW_current* current, String title/* = ""*/) {
+void drawTopBar(TFT_eSPI tft, OW_current* current, String title, byte currentFrame, byte maxFrame) {
   tft.loadFont(AA_FONT_LARGE);
 
   // Convert UTC to local time, returns zone code in tz1_Code, e.g "GMT"
@@ -42,15 +42,31 @@ void drawTime(TFT_eSPI tft, OW_current* current, String title/* = ""*/) {
   tft.drawString(title, rightOfTime, 10);
   
   tft.unloadFont();
+
+  const unsigned int dotRadius = 4;
+  const unsigned int dotSpace = (dotRadius * 2) + round(dotRadius / 2.0) + 2;
+  const unsigned int dotStartX = rightOfTime + (dotRadius / 2) + 3;
+  const unsigned int dotY = 10 + 17 + dotRadius;
+
+  unsigned int dotX = dotStartX;
+
+  for (byte i = 0; i <= maxFrame; i ++) {
+    if (i == currentFrame) {
+      tft.fillCircle(dotX, dotY, dotRadius, TFT_WHITE);
+    } else {
+      tft.drawCircle(dotX, dotY, dotRadius, TFT_WHITE);
+    }
+    dotX += dotSpace;
+  }
 }
 
-void drawAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, OW_extra* extra) {
+void drawWeatherNow(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, OW_extra* extra) {
   tft.fillScreen(TFT_BLACK);
-  drawCurrentWeatherAtAGlance(tft, ui, current, extra);
-  drawForecastAtAGlance(tft, ui, current, daily);
+  drawCurrentWeatherNow(tft, ui, current, extra);
+  drawForecastWeatherNow(tft, ui, current, daily);
 }
 
-void drawCurrentWeatherAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_extra* extra) {
+void drawCurrentWeatherNow(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_extra* extra) {
   String weatherText;
 
   tft.loadFont(AA_FONT_SMALL);
@@ -197,20 +213,20 @@ void drawCurrentWeatherAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW
   tft.unloadFont();
 }
 
-void drawForecastAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily) {
+void drawForecastWeatherNow(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily) {
   drawHSeparator(tft, 231);
 
   int8_t dayIndex = 1;
 
   tft.loadFont(AA_FONT_SMALL);
-  drawDetailForecastAtAGlance(tft, ui, current, daily, 8, 250, dayIndex ++);
-  drawDetailForecastAtAGlance(tft, ui, current, daily, 66, 250, dayIndex ++);
-  drawDetailForecastAtAGlance(tft, ui, current, daily, 124, 250, dayIndex ++);
-  drawDetailForecastAtAGlance(tft, ui, current, daily, 182, 250, dayIndex);
+  drawDetailForecastWeatherNow(tft, ui, current, daily, 8, 250, dayIndex ++);
+  drawDetailForecastWeatherNow(tft, ui, current, daily, 66, 250, dayIndex ++);
+  drawDetailForecastWeatherNow(tft, ui, current, daily, 124, 250, dayIndex ++);
+  drawDetailForecastWeatherNow(tft, ui, current, daily, 182, 250, dayIndex);
   tft.unloadFont();
 }
 
-void drawDetailForecastAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex) {
+void drawDetailForecastWeatherNow(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex) {
   if (dayIndex >= MAX_DAYS) return;
 
   String day = shortDOW[weekday(TIMEZONE.toLocal(daily->dt[dayIndex], &tz1_Code))];

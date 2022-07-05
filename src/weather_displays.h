@@ -6,12 +6,12 @@
 #define AA_FONT_SMALL "fonts/NotoSansBold15"
 #define AA_FONT_LARGE "fonts/NotoSansBold36"
 
-void drawTime(TFT_eSPI tft, OW_current* current, String title = "");
+void drawTopBar(TFT_eSPI tft, OW_current* current, String title, byte currentFrame, byte maxFrame);
 
-void drawAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, OW_extra* extra);
-void drawCurrentWeatherAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_extra* extra);
-void drawForecastAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily);
-void drawDetailForecastAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex);
+void drawWeatherNow(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, OW_extra* extra);
+void drawCurrentWeatherNow(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_extra* extra);
+void drawForecastWeatherNow(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily);
+void drawDetailForecastWeatherNow(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex);
 
 void drawHourlyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra);
 void drawDetailHourlyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra, uint16_t x, uint16_t y, byte hrIndex);
