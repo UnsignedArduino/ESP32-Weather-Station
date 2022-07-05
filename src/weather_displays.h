@@ -6,7 +6,7 @@
 #define AA_FONT_SMALL "fonts/NotoSansBold15"
 #define AA_FONT_LARGE "fonts/NotoSansBold36"
 
-void drawTime(TFT_eSPI tft, OW_current* current);
+void drawTime(TFT_eSPI tft, OW_current* current, String title = "");
 
 void drawAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, OW_extra* extra);
 void drawCurrentWeatherAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_extra* extra);

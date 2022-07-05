@@ -25,6 +25,7 @@ bool booting = true;
 
 #define MAX_CAROUSEL_INDEX 2
 byte carouselIndex = 0;
+String title;
 
 long lastDownloadUpdate = millis();
 
@@ -78,26 +79,29 @@ void loop() {
     switch (carouselIndex) {
       case 0: {
         Serial.println("Drawing at a glance frame");
+        title = "At a glance";
         drawAtAGlance(tft, ui, current, daily, extra);
         break;
       }
       case 1: {
         Serial.println("Drawing hourly forecast frame");
+        title = "Hourly forecast";
         drawHourlyForecast(tft, ui, current, hourly, extra);
         break;
       }
       case 2: {
         Serial.println("Drawing daily forecast frame");
+        title = "Daily forecast";
         drawDailyForecast(tft, ui, current, daily);
         break;
       }
     }
-    drawTime(tft, current);
+    drawTime(tft, current, title);
     lastDownloadUpdate = millis();
   }
 
   if (booting || minute() != lastMinute || cmd == 't') {
-    drawTime(tft, current);
+    drawTime(tft, current, title);
     lastMinute = minute();
     syncTime();
   }

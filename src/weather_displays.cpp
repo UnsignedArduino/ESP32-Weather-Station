@@ -6,7 +6,7 @@
 #include "weather_displays.h"
 #include "All_Settings.h"
 
-void drawTime(TFT_eSPI tft, OW_current* current) {
+void drawTime(TFT_eSPI tft, OW_current* current, String title/* = ""*/) {
   tft.loadFont(AA_FONT_LARGE);
 
   // Convert UTC to local time, returns zone code in tz1_Code, e.g "GMT"
@@ -23,17 +23,22 @@ void drawTime(TFT_eSPI tft, OW_current* current) {
   tft.setTextDatum(TL_DATUM);
   tft.setTextColor(TFT_YELLOW, TFT_BLACK);
   tft.setTextPadding(tft.textWidth(" 44:44 "));  // String width + margin
-  tft.drawString(timeNow, 10, 10);
+  const unsigned int rightOfTime = 15 + tft.drawString(timeNow, 10, 10);
 
   String date = "Updated: " + strDateAndTime(current->dt);
   String weatherText = "None";
 
   tft.unloadFont();
   tft.loadFont(AA_FONT_SMALL);
+
   tft.setTextDatum(TL_DATUM);
   tft.setTextColor(TFT_ORANGE, TFT_BLACK);
   tft.setTextPadding(tft.textWidth("Updated: Mmm 44 44:44"));  // String width + margin
   tft.drawString(date, 10, 45);
+
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.drawString(title, rightOfTime, 10);
+  
   tft.unloadFont();
 }
 
