@@ -9,16 +9,15 @@
 void drawTime(TFT_eSPI tft, OW_current* current);
 
 void drawAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, OW_extra* extra);
-
 void drawCurrentWeatherAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_extra* extra);
 void drawForecastAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily);
 void drawDetailForecastAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex);
 
-void drawHourlyWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra);
-void drawDetailHourlyWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra, uint16_t x, uint16_t y, byte hrIndex);
+void drawHourlyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra);
+void drawDetailHourlyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra, uint16_t x, uint16_t y, byte hrIndex);
 
-void drawForecastWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily);
-void drawDetailForecastWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex);
+void drawDailyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily);
+void drawDetailDailyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex);
 
 const char* getMeteoconIcon(OW_current* current, uint16_t id, bool today);
 

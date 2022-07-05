@@ -233,14 +233,14 @@ void drawDetailForecastAtAGlance(TFT_eSPI tft, GfxUi ui, OW_current* current, OW
   tft.setTextPadding(0); // Reset padding width to none
 }
 
-void drawHourlyWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra) {
+void drawHourlyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra) {
   tft.fillScreen(TFT_BLACK);
   tft.loadFont(AA_FONT_SMALL);
 
   for (byte i = 0; i < MAX_HOURS; i ++) {
     uint16_t x = 7 + (i % 4) * 57;
     uint16_t y = 90 + (i / 4) * 80;
-    drawDetailHourlyWeather(tft, ui, current, hourly, extra, x, y, i);
+    drawDetailHourlyForecast(tft, ui, current, hourly, extra, x, y, i);
     drawHSeparator(tft, y - 25);
     if (i % 4 > 0) {
       drawVSeparator(tft, x - 3);
@@ -250,7 +250,7 @@ void drawHourlyWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* h
   tft.unloadFont();
 }
 
-void drawDetailHourlyWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra, uint16_t x, uint16_t y, byte hrIndex) {
+void drawDetailHourlyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra, uint16_t x, uint16_t y, byte hrIndex) {
   if (hrIndex >= MAX_HOURS) {
     return;
   }
@@ -277,14 +277,14 @@ void drawDetailHourlyWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hou
   ui.drawBmp("/icon50/" + weatherIcon + ".bmp", x, y);
 }
 
-void drawForecastWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily) {
+void drawDailyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily) {
   tft.fillScreen(TFT_BLACK);
   tft.loadFont(AA_FONT_SMALL);
 
   for (byte i = 0; i < MAX_DAYS; i ++) {
     uint16_t x = 7 + (i % 4) * 57;
     uint16_t y = 90 + (i / 4) * 120;
-    drawDetailForecastWeather(tft, ui, current, daily, x, y, i);
+    drawDetailDailyForecast(tft, ui, current, daily, x, y, i);
     drawHSeparator(tft, y - 25);
     if (i % 4 > 0) {
       drawVSeparator(tft, x - 3);
@@ -294,7 +294,7 @@ void drawForecastWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* 
   tft.unloadFont();
 }
 
-void drawDetailForecastWeather(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex) {
+void drawDetailDailyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex) {
   if (dayIndex >= MAX_DAYS) return;
 
   String day = shortDOW[weekday(TIMEZONE.toLocal(daily->dt[dayIndex], &tz1_Code))];

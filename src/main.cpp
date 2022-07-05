@@ -23,6 +23,9 @@ OW_daily* daily;
 
 bool booting = true;
 
+#define MAX_CAROUSEL_INDEX 2
+byte carouselIndex = 0;
+
 long lastDownloadUpdate = millis();
 
 bool updateData();
@@ -72,9 +75,23 @@ void loop() {
       lastDownloadUpdate = millis() - 1000UL * (UPDATE_INTERVAL_SECS + 60);
       return;
     }
-    // drawAtAGlance(tft, ui, current, daily, extra);
-    // drawHourlyWeather(tft, ui, current, hourly, extra);
-    drawForecastWeather(tft, ui, current, daily);
+    switch (carouselIndex) {
+      case 0: {
+        Serial.println("Drawing at a glance frame");
+        drawAtAGlance(tft, ui, current, daily, extra);
+        break;
+      }
+      case 1: {
+        Serial.println("Drawing hourly forecast frame");
+        drawHourlyForecast(tft, ui, current, hourly, extra);
+        break;
+      }
+      case 2: {
+        Serial.println("Drawing daily forecast frame");
+        drawDailyForecast(tft, ui, current, daily);
+        break;
+      }
+    }
     drawTime(tft, current);
     lastDownloadUpdate = millis();
   }
