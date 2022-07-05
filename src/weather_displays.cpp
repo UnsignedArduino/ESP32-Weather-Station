@@ -19,11 +19,12 @@ void drawTime(TFT_eSPI tft, OW_current* current, String title/* = ""*/) {
   timeNow += ":";
   if (minute(local_time) < 10) timeNow += "0";
   timeNow += minute(local_time);
+  timeNow += " ";
 
   tft.setTextDatum(TL_DATUM);
   tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-  tft.setTextPadding(tft.textWidth("44:44"));  // String width + margin
-  const unsigned int rightOfTime = 15 + tft.drawString(timeNow, 10, 10);
+  tft.setTextPadding(tft.textWidth("44:44 "));  // String width + margin
+  const unsigned int rightOfTime = 10 + tft.drawString(timeNow, 10, 10);
 
   String date = "Updated: " + strDateAndTime(current->dt);
   String weatherText = "None";
@@ -37,6 +38,7 @@ void drawTime(TFT_eSPI tft, OW_current* current, String title/* = ""*/) {
   tft.drawString(date, 10, 45);
 
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.setTextPadding(title.length());
   tft.drawString(title, rightOfTime, 10);
   
   tft.unloadFont();
