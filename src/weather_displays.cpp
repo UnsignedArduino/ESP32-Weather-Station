@@ -61,7 +61,6 @@ void drawTopBar(TFT_eSPI tft, OW_current* current, String title, byte currentFra
 }
 
 void drawWeatherNow(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, OW_extra* extra) {
-  tft.fillScreen(TFT_BLACK);
   drawCurrentWeatherNow(tft, ui, current, extra);
   drawForecastWeatherNow(tft, ui, current, daily);
 }
@@ -257,7 +256,6 @@ void drawDetailForecastWeatherNow(TFT_eSPI tft, GfxUi ui, OW_current* current, O
 }
 
 void drawHourlyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_hourly* hourly, OW_extra* extra) {
-  tft.fillScreen(TFT_BLACK);
   tft.loadFont(AA_FONT_SMALL);
 
   for (byte i = 0; i < MAX_HOURS; i ++) {
@@ -301,7 +299,6 @@ void drawDetailHourlyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_ho
 }
 
 void drawDailyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily) {
-  tft.fillScreen(TFT_BLACK);
   tft.loadFont(AA_FONT_SMALL);
 
   for (byte i = 0; i < MAX_DAYS; i ++) {

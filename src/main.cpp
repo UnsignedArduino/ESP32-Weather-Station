@@ -28,6 +28,8 @@ bool redraw = true;
 byte carouselIndex = 0;
 String title;
 
+String carouselTitles[MAX_CAROUSEL_INDEX + 1] = {"Weather now", "Hourly forecast", "Daily forecast"};
+
 long lastDownloadUpdate = millis();
 
 bool updateData();
@@ -107,27 +109,26 @@ void loop() {
     redraw = false;
     Serial.print("carouselIndex is ");
     Serial.println(carouselIndex);
+    tft.fillScreen(TFT_BLACK);
+    title = carouselTitles[carouselIndex];
+    drawTopBar(tft, current, title, carouselIndex, MAX_CAROUSEL_INDEX);
     switch (carouselIndex) {
       case 0: {
         Serial.println("Drawing at a glance frame");
-        title = "Weather now";
         drawWeatherNow(tft, ui, current, daily, extra);
         break;
       }
       case 1: {
         Serial.println("Drawing hourly forecast frame");
-        title = "Hourly forecast";
         drawHourlyForecast(tft, ui, current, hourly, extra);
         break;
       }
       case 2: {
         Serial.println("Drawing daily forecast frame");
-        title = "Daily forecast";
         drawDailyForecast(tft, ui, current, daily);
         break;
       }
     }
-    drawTopBar(tft, current, title, carouselIndex, MAX_CAROUSEL_INDEX);
     lastDownloadUpdate = millis();
   }
 
