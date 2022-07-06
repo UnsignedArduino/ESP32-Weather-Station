@@ -52,7 +52,8 @@ void drawTopBar(TFT_eSPI tft, OW_current* current, String title, byte currentFra
 
   for (byte i = 0; i <= maxFrame; i ++) {
     if (i == currentFrame) {
-      tft.fillCircle(dotX, dotY, dotRadius, TFT_WHITE);
+      // tft.fillCircle(dotX, dotY, dotRadius, TFT_WHITE);
+      tft.drawSpot(dotX, dotY, dotRadius + 0.5, TFT_WHITE);  // anti-aliased
     } else {
       tft.drawCircle(dotX, dotY, dotRadius, TFT_WHITE);
     }
