@@ -154,10 +154,14 @@ void loop() {
 }
 
 bool updateData() {
+  const byte loadingCircleRadius = 6;
+  const unsigned int loadingCircleX = 240 - loadingCircleRadius - (loadingCircleRadius / 2);
+  const unsigned int loadingCircleY = 45 + (loadingCircleRadius / 2) + 4;
+
   if (booting) {
     drawProgress(tft, ui, 40, "Updating time...");
   } else {
-    fillSegment(tft, 225, 15, 0, 0, 12, TFT_NAVY);
+    fillSegment(tft, loadingCircleX, loadingCircleY, 0, 0, loadingCircleRadius, TFT_NAVY);
   }
 
   if (current != nullptr) {
@@ -175,7 +179,7 @@ bool updateData() {
   if (booting) {
     drawProgress(tft, ui, 60, "Updating weather...");
   } else {
-    fillSegment(tft, 225, 15, 0, 120, 12, TFT_NAVY);
+    fillSegment(tft, loadingCircleX, loadingCircleY, 0, 120, loadingCircleRadius, TFT_NAVY);
   }
 
   bool parsed = ow.getForecast(current, hourly, daily, api_key, latitude, longitude, units, language);
@@ -183,7 +187,7 @@ bool updateData() {
   if (booting) {
     drawProgress(tft, ui, 80, "Updating weather...");
   } else {
-    fillSegment(tft, 225, 15, 0, 240, 12, TFT_NAVY);
+    fillSegment(tft, loadingCircleX, loadingCircleY, 0, 240, loadingCircleRadius, TFT_NAVY);
   }
 
   parsed = parsed && ow.getExtra(extra, api_key, latitude, longitude, units, language);
@@ -203,7 +207,7 @@ bool updateData() {
     drawProgress(tft, ui, 100, "Done!");
     delay(2000);
   } else {
-    fillSegment(tft, 225, 15, 0, 360, 12, TFT_NAVY);
+    fillSegment(tft, loadingCircleX, loadingCircleY, 0, 360, loadingCircleRadius, TFT_NAVY);
     delay(2000);
   }
 
