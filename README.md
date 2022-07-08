@@ -2,6 +2,10 @@
 
 [https://github.com/Bodmer/OpenWeather/tree/master/examples/TFT_eSPI_OpenWeather](https://github.com/Bodmer/OpenWeather/tree/master/examples/TFT_eSPI_OpenWeather), but fixed to work on PlatformIO!
 
+This branch contains the the original TFT_eSPI_OpenWeather example by Bodmer, only modified to just compile and upload on PlatformIO. 
+
+Go to the [`modifications`](https://github.com/UnsignedArduino/ESP32-Weather-Station/tree/modifications) branch to see my changes!
+
 ## Hardware
 
 ### Parts
@@ -25,7 +29,7 @@ You need:
 1. Clone this repo somewhere.
 2. Open in your preferred IDE. (for example, VS Code with PlatformIO plugin)
 3. Rename `src/All_Settings template.h` to `src/All_Settings.h` and change your settings.
-4. Run `PlatformIO: Project Tasks - <board name> - General - Build`.
+4. Run `PlatformIO: Project Tasks - <board name> - General - Build`. (So the libraries are downloaded)
 5. Copy the contents of `src/User_Setup.h` to `.pio\libdeps\<your board name>\TFT_eSPI\User_Setup.h`.
 6. Change `upload_port` and `monitor_port` in `platformio.ini` if needed. (much more reliable then relying on auto-detect)
 7. Run `PlatformIO: Project Tasks - <board name> - General - Upload`.
