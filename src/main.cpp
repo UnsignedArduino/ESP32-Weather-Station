@@ -54,6 +54,7 @@ void setup() {
   listFiles();
 
   drawProgress(tft, ui, 20, "Calibrating touch...");
+  Serial.println("Calibrating touch");
   leftPin.begin(LEFT_TPIN);
   rightPin.begin(RIGHT_TPIN);
   leftPin.calibrate(CALIBRATION_TIME);

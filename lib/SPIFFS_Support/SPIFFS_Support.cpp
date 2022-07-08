@@ -1,13 +1,7 @@
-/*====================================================================================
-  This sketch contains support functions for the ESP6266 SPIFFS filing system
+#include <Arduino.h>
+#include <SPIFFS.h>
+#include "SPIFFS_Support.h"
 
-  Created by Bodmer 15th Jan 2017
-  ==================================================================================*/
-void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
-
-// -------------------------------------------------------------------------
-// List SPIFFS files in a neat format for ESP8266 or ESP32
-// -------------------------------------------------------------------------
 void listFiles(void) {
   Serial.println();
   Serial.println("SPIFFS files found:");
@@ -40,7 +34,6 @@ void listFiles(void) {
   delay(1000);
 }
 
-#ifdef ESP32
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
   Serial.printf("Listing directory: %s\n", dirname);
 
@@ -81,5 +74,4 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
     file = root.openNextFile();
   }
 }
-#endif
-//====================================================================================
+
