@@ -3,6 +3,7 @@
 #include <TFT_eSPI.h>
 #include "GfxUi.h"
 #include "weather_displays.h"
+#include "ESP32Touch.h"
 #include "SPIFFS_Support.h"
 #include <WiFi.h>
 #include <JSON_Decoder.h>
@@ -32,11 +33,16 @@ String carouselTitles[MAX_CAROUSEL_INDEX + 1] = {"Weather now", "Hourly forecast
 
 long lastDownloadUpdate = millis();
 
+ESP32TouchPin leftPin = ESP32TouchPin();
+ESP32TouchPin rightPin = ESP32TouchPin();
+
 bool updateData();
 void printWeather();
 
 void setup() {
   Serial.begin(9600);
+
+  pinMode(LED_BUILTIN, OUTPUT);
 
   tft.begin();
   tft.fillScreen(TFT_BLACK);
@@ -47,7 +53,13 @@ void setup() {
   drawProgress(tft, ui, 10, "Initializing filesystem...");
   listFiles();
 
-  drawProgress(tft, ui, 20, "Connecting to WiFi...");
+  drawProgress(tft, ui, 20, "Calibrating touch...");
+  leftPin.begin(LEFT_TPIN);
+  rightPin.begin(RIGHT_TPIN);
+  leftPin.calibrate(CALIBRATION_TIME);
+  rightPin.calibrate(CALIBRATION_TIME);
+
+  drawProgress(tft, ui, 30, "Connecting to WiFi...");
   
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
@@ -72,6 +84,18 @@ void loop() {
     cmd = Serial.read();
   }
   #endif
+
+  const bool leftTouched = leftPin.isTouching();
+  const bool rightTouched = rightPin.isTouching();
+
+  if (leftTouched) {
+    Serial.println("Left touch pin touching");
+  }
+  if (rightTouched) {
+    Serial.println("Right touch pin touching");
+  }
+
+  digitalWrite(LED_BUILTIN, leftTouched || rightTouched);
 
   if (booting || 
       (millis() - lastDownloadUpdate > 1000UL * UPDATE_INTERVAL_SECS) ||

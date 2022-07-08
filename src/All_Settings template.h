@@ -43,6 +43,13 @@ const int UPDATE_INTERVAL_SECS = 15 * 60UL; // 15 minutes
 
 // Pins for the TFT interface are defined in the User_Config.h file inside the TFT_eSPI library
 
+// Touch pins for controlling
+// https://microcontrollerslab.com/esp32-touch-sensor-button-example/#:~:text=Rest%20of%20the-,pin%20mapping,-is%20given%20below
+#define LEFT_TPIN T9
+#define RIGHT_TPIN T8
+
+#define CALIBRATION_TIME 500  // ms per touch pin
+
 // For units use "metric" or "imperial"
 const String units = "metric";
 

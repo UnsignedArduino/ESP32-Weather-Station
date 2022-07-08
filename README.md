@@ -18,6 +18,8 @@ You need:
 - ESP32 23 (VSPI MOSI) to TFT MOSI
 - ESP32 5 (VSPI default CS) to TFT CS**
 - ESP32 17 to TFT D/C**
+- ESP32 32 (T9) to left "button" (touch pin)
+- ESP32 33 (T8) to right "button" (touch pin)
 
 ** These can be changed in `src/User_Setup.h` file for TFT_eSPI
 
