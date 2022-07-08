@@ -26,9 +26,9 @@ You need:
 ## Software
 1. Clone this repo somewhere.
 2. Open in your preferred IDE. (for example, VS Code with PlatformIO plugin)
-3. Rename `src/All_Settings template.h` to `src/All_Settings.h` and change your settings.
+3. Rename `include/All_Settings template.h` to `include/All_Settings.h` and change your settings.
 4. Run `PlatformIO: Project Tasks - <board name> - General - Build`.
-5. Copy the contents of `src/User_Setup.h` to `.pio\libdeps\<your board name>\TFT_eSPI\User_Setup.h`.
+5. Copy the contents of `include/User_Setup.h` to `.pio\libdeps\<your board name>\TFT_eSPI\User_Setup.h`.
 6. Change `upload_port` and `monitor_port` in `platformio.ini` if needed. (much more reliable then relying on auto-detect)
 7. Run `PlatformIO: Project Tasks - <board name> - General - Upload`.
 8. Run `PlatformIO: Project Tasks - <board name> - Platform - Build Filesystem Image`.
