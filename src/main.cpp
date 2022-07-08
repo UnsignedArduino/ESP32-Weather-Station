@@ -111,14 +111,14 @@ void loop() {
   if (cmd == 'r') {
     Serial.println("Flag manual redraw");
     redraw = true;
-  } else if (cmd == 'n') {
+  } else if (rightTouched || cmd == 'n') {
     Serial.println("Incrementing carousel frame index by 1");
     carouselIndex ++;
     if (carouselIndex > MAX_CAROUSEL_INDEX) {
       carouselIndex = 0;
     }
     redraw = true;
-  } else if (cmd == 'p') {
+  } else if (leftTouched || cmd == 'p') {
     Serial.println("Decrementing carousel frame index by 1");
     if (carouselIndex > 0) {
       carouselIndex --;
