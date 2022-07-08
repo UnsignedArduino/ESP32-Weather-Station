@@ -28,6 +28,7 @@ You need:
 - ESP32 33 (T8) to right "button" (touch pin)***
 
 ** These can be changed in `include/User_Setup.h` for TFT_eSPI.
+
 *** These can be changed in `include/All_Settings.h`.
 
 ## Software
