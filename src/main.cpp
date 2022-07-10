@@ -25,11 +25,11 @@ OW_daily* daily;
 bool booting = true;
 bool redraw = true;
 
-#define MAX_CAROUSEL_INDEX 2
+#define MAX_CAROUSEL_INDEX 3
 byte carouselIndex = 0;
 String title;
 
-String carouselTitles[MAX_CAROUSEL_INDEX + 1] = {"Weather now", "Hourly forecast", "Daily forecast"};
+String carouselTitles[MAX_CAROUSEL_INDEX + 1] = {"Weather now", "Hourly forecast", "Daily forecast", "Miscellaneous"};
 
 long lastDownloadUpdate = millis();
 
@@ -151,6 +151,11 @@ void loop() {
       case 2: {
         Serial.println("Drawing daily forecast frame");
         drawDailyForecast(tft, ui, current, daily);
+        break;
+      }
+      case 3: {
+        Serial.println("Drawing miscellaneous frame");
+        drawMiscellaneous(tft, ui, current);
         break;
       }
     }

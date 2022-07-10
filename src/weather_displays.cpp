@@ -3,6 +3,7 @@
 #include "GfxUi.h"
 #include "OpenWeather.h"
 #include "NTP_Time.h"
+#include "MoonPhase.h"
 #include "weather_displays.h"
 #include "All_Settings.h"
 
@@ -191,21 +192,6 @@ void drawCurrentWeatherNow(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_extra
   tft.setTextPadding(tft.textWidth("11")); // Max string length?
   tft.drawString(weatherText, 10 + uvOffset, 188);
 
-  // if (units == "imperial")
-  // {
-  //   weatherText = current->pressure * 0.02953;
-  //   weatherText += " in";
-  // }
-  // else
-  // {
-  //   weatherText = String(current->pressure, 0);
-  //   weatherText += " hPa";
-  // }
-
-  // tft.setTextDatum(TR_DATUM);
-  // tft.setTextPadding(tft.textWidth(" 8888hPa")); // Max string length?
-  // tft.drawString(weatherText, 230, 148);
-
   drawHSeparator(tft, 165);
 
   tft.setTextDatum(TL_DATUM); // Reset datum to normal
@@ -352,6 +338,49 @@ void drawDetailDailyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_dai
   ui.drawBmp("/icon50/" + weatherIcon + ".bmp", x, y + 35);
 
   tft.setTextPadding(0); // Reset padding width to none
+}
+
+void drawMiscellaneous(TFT_eSPI tft, GfxUi ui, OW_current* current) {
+  tft.loadFont(AA_FONT_SMALL);
+
+  drawHSeparator(tft, 65);
+
+  drawMiscellaneousLabelValue(tft, "Sunrise: ", strTime(current->sunrise), 10, 70);
+  drawMiscellaneousLabelValue(tft, "Sunset: ", strTime(current->sunset), 10, 87);
+
+  if (units == "imperial") {
+    drawMiscellaneousLabelValue(tft, "Pressure: ", String(current->pressure * 0.02953) + " in", 10, 113);
+  } else {
+    drawMiscellaneousLabelValue(tft, "Pressure: ", String(current->pressure, 0) + " hPa", 10, 113);
+  }
+
+  drawMiscellaneousLabelValue(tft, "Cloud cover: ", String(current->clouds) + "%", 10, 130);
+
+  time_t local_time = TIMEZONE.toLocal(current->dt, &tz1_Code);
+  uint16_t y = year(local_time);
+  uint8_t  m = month(local_time);
+  uint8_t  d = day(local_time);
+  uint8_t  h = hour(local_time);
+  int      ip;
+  uint8_t icon = moon_phase(y, m, d, h, &ip);
+
+  tft.setTextDatum(TC_DATUM);
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.setTextPadding(tft.textWidth(" Last qtr "));
+  tft.drawString(moonPhase[ip], 240 - 30 - 15, 130);
+
+  ui.drawBmp("/moon/moonphase_L" + String(icon) + ".bmp", 240 - 60 - 15, 70);
+
+  tft.unloadFont();
+}
+
+void drawMiscellaneousLabelValue(TFT_eSPI tft, String label, String value, uint16_t x, uint16_t y) {
+  tft.setTextDatum(TL_DATUM);
+  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+  tft.setTextPadding(0);
+  const unsigned int labelRight = tft.drawString(label, x, y);
+  tft.setTextPadding(240 - labelRight);
+  tft.drawString(value, x + labelRight, y);
 }
 
 const char* getMeteoconIcon(OW_current* current, uint16_t id, bool today) {

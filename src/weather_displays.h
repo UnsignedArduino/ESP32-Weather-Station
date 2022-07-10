@@ -19,6 +19,9 @@ void drawDetailHourlyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_ho
 void drawDailyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily);
 void drawDetailDailyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex);
 
+void drawMiscellaneous(TFT_eSPI tft, GfxUi ui, OW_current* current);
+void drawMiscellaneousLabelValue(TFT_eSPI tft, String label, String value, uint16_t x, uint16_t y);
+
 const char* getMeteoconIcon(OW_current* current, uint16_t id, bool today);
 
 void drawProgress(TFT_eSPI tft, GfxUi ui, uint8_t percentage, String text);
