@@ -123,17 +123,7 @@ void drawCurrentWeatherNow(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_extra
   if (units == "metric") degreeSize = tft.drawString("oC", 110 + tempSize, 113);
   else degreeSize = tft.drawString("oF", 110 + tempSize, 113);
 
-  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-  const unsigned int humidityOffset = tft.drawString("Humidity: ", 105, 145);
-
-  String humidity = "";
-  humidity += current->humidity;
-  humidity += "%";
-
-  tft.setTextDatum(TL_DATUM);
-  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-  tft.setTextPadding(tft.textWidth("100%"));
-  tft.drawString(humidity, 105 + humidityOffset, 145);
+  drawLabelValueTL(tft, "Humidity: ", String(current->humidity) + "%", 105, 145);
 
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
 
@@ -157,13 +147,7 @@ void drawCurrentWeatherNow(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_extra
   // ui.drawBmp("/wind/" + wind[windAngle] + ".bmp", 101, 98);
   weatherText += wind[windAngle];
 
-  const unsigned int windOffset = tft.drawString("Wind: ", 10, 170);
-
-  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-
-  tft.setTextDatum(TL_DATUM);
-  tft.setTextPadding(tft.textWidth("888 m/s NW")); // Max string length?
-  tft.drawString(weatherText, 10 + windOffset, 170);
+  drawLabelValueTL(tft, "Wind: ", weatherText, 10, 170);
 
   tft.setTextColor(TFT_ORANGE, TFT_BLACK);
   weatherText = String(current->uvi, 0);
@@ -345,16 +329,16 @@ void drawMiscellaneous(TFT_eSPI tft, GfxUi ui, OW_current* current) {
 
   drawHSeparator(tft, 65);
 
-  drawMiscellaneousLabelValue(tft, "Sunrise: ", strTime(current->sunrise), 10, 70);
-  drawMiscellaneousLabelValue(tft, "Sunset: ", strTime(current->sunset), 10, 87);
+  drawLabelValueTL(tft, "Sunrise: ", strTime(current->sunrise), 10, 70);
+  drawLabelValueTL(tft, "Sunset: ", strTime(current->sunset), 10, 87);
 
   if (units == "imperial") {
-    drawMiscellaneousLabelValue(tft, "Pressure: ", String(current->pressure * 0.02953) + " in", 10, 113);
+    drawLabelValueTL(tft, "Pressure: ", String(current->pressure * 0.02953) + " in", 10, 113);
   } else {
-    drawMiscellaneousLabelValue(tft, "Pressure: ", String(current->pressure, 0) + " hPa", 10, 113);
+    drawLabelValueTL(tft, "Pressure: ", String(current->pressure, 0) + " hPa", 10, 113);
   }
 
-  drawMiscellaneousLabelValue(tft, "Cloud cover: ", String(current->clouds) + "%", 10, 130);
+  drawLabelValueTL(tft, "Cloud cover: ", String(current->clouds) + "%", 10, 130);
 
   time_t local_time = TIMEZONE.toLocal(current->dt, &tz1_Code);
   uint16_t y = year(local_time);
@@ -374,7 +358,7 @@ void drawMiscellaneous(TFT_eSPI tft, GfxUi ui, OW_current* current) {
   tft.unloadFont();
 }
 
-void drawMiscellaneousLabelValue(TFT_eSPI tft, String label, String value, uint16_t x, uint16_t y) {
+void drawLabelValueTL(TFT_eSPI tft, String label, String value, uint16_t x, uint16_t y) {
   tft.setTextDatum(TL_DATUM);
   tft.setTextColor(TFT_ORANGE, TFT_BLACK);
   tft.setTextPadding(0);
