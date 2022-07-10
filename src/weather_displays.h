@@ -21,6 +21,7 @@ void drawDetailDailyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_dai
 
 void drawMiscellaneous(TFT_eSPI tft, GfxUi ui, OW_current* current);
 void drawMiscellaneousSystem(TFT_eSPI tft);
+void updateMiscellaneousSystem(TFT_eSPI tft);
 
 void drawLabelValueTL(TFT_eSPI tft, String label, String value, uint16_t x, uint16_t y);
 
@@ -43,3 +44,4 @@ void fillSegment(TFT_eSPI tft, int x, int y, int start_angle, int sub_angle, int
 String strTime(time_t unixTime);
 String strDate(time_t unixTime);
 String strDateAndTime(time_t unixTime);
+String strDuration(unsigned long secs);

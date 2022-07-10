@@ -31,7 +31,10 @@ String title;
 
 String carouselTitles[MAX_CAROUSEL_INDEX + 1] = {"Weather now", "Hourly forecast", "Daily forecast", "Miscellaneous"};
 
-long lastDownloadUpdate = millis();
+unsigned long lastDownloadUpdate = millis();
+unsigned long lastContentUpdate = millis();
+
+const unsigned long contentUpdateRate = 1000;
 
 ESP32TouchPin leftPin = ESP32TouchPin();
 ESP32TouchPin rightPin = ESP32TouchPin();
@@ -156,10 +159,16 @@ void loop() {
       case 3: {
         Serial.println("Drawing miscellaneous frame");
         drawMiscellaneous(tft, ui, current);
+        lastContentUpdate = millis();
         break;
       }
     }
     lastDownloadUpdate = millis();
+  }
+
+  if (carouselIndex == 3 && millis() - lastContentUpdate > contentUpdateRate) {
+    lastContentUpdate = millis();
+    updateMiscellaneousSystem(tft);
   }
 
   if (booting || minute() != lastMinute || cmd == 't') {

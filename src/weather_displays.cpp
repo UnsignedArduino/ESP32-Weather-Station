@@ -379,6 +379,27 @@ void drawMiscellaneousSystem(TFT_eSPI tft) {
   drawLabelValueTL(tft, "Sketch MD5: ", sketchMD5.substring(0, 26), 10, 277);
   drawLabelValueTL(tft, "            ", sketchMD5.substring(26), 10, 287);
   drawLabelValueTL(tft, "Sketch size: ", String(ESP.getSketchSize() / 1024) + " KiB", 10, 297);
+  drawLabelValueTL(tft, "Uptime: ", strDuration(millis() / 1000), 10, 307);
+}
+
+void updateMiscellaneousSystem(TFT_eSPI tft) {
+  // drawLabelValueTL(tft, "System information", "", 10, 157);
+  // drawLabelValueTL(tft, "Chip model: ", String(ESP.getChipModel()) + " rev " + ESP.getChipRevision() + " (" + ESP.getChipCores() + "C)", 10, 167);
+  // drawLabelValueTL(tft, "Chip frequency: ", String(ESP.getCpuFreqMHz()) + " MHz", 10, 177);
+  // drawLabelValueTL(tft, "EFuse MAC: ", "0x" + uint64ToString(ESP.getEfuseMac(), 16), 10, 187);
+  // drawLabelValueTL(tft, "Flash: ", String(ESP.getFlashChipSize() / 1024) + " KiB at " + (ESP.getFlashChipSpeed() / 1000000) + " MHz", 10, 207);;
+  // drawLabelValueTL(tft, "Flash mode: ", flashModeToString(ESP.getFlashChipMode()), 10, 197);
+  drawLabelValueTL(tft, "Free heap: ", String(ESP.getFreeHeap() / 1024) + " KiB", 10, 217);
+  // drawLabelValueTL(tft, "Free sketch space: ", String(ESP.getFreeSketchSpace() / 1024) + " KiB", 10, 227);
+  drawLabelValueTL(tft, "Heap size: ", String(ESP.getHeapSize() / 1024) + " KiB", 10, 237);
+  drawLabelValueTL(tft, "Max heap alloc: ", String(ESP.getMaxAllocHeap() / 1024) + " KiB", 10, 247);
+  drawLabelValueTL(tft, "Min free heap: ", String(ESP.getMinFreeHeap() / 1024) + " KiB", 10, 257);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+  // drawLabelValueTL(tft, "SDK version: ", String(ESP.getSdkVersion()), 10, 267);
+  // String sketchMD5 = ESP.getSketchMD5();
+  // drawLabelValueTL(tft, "Sketch MD5: ", sketchMD5.substring(0, 26), 10, 277);
+  // drawLabelValueTL(tft, "            ", sketchMD5.substring(26), 10, 287);
+  // drawLabelValueTL(tft, "Sketch size: ", String(ESP.getSketchSize() / 1024) + " KiB", 10, 297);
+  drawLabelValueTL(tft, "Uptime: ", strDuration(millis() / 1000), 10, 307);
 }
 
 void drawLabelValueTL(TFT_eSPI tft, String label, String value, uint16_t x, uint16_t y) {
@@ -549,4 +570,32 @@ String strDateAndTime(time_t unixTime) {
   localDate += " " + strTime(unixTime);
 
   return localDate;
+}
+
+String strDuration(unsigned long secs) {
+  if (secs < 60) {
+    if (secs == 1) {
+      return String("1 second");
+    } else {
+      return String(secs) + " seconds";
+    }
+  } else if (secs < 60 * 60) {
+    if (secs / 60 == 1) {
+      return String("1 minute");
+    } else {
+      return String(secs / 60) + " minutes";
+    }
+  } else if (secs < 60 * 60 * 24) {
+    if (secs / 60 / 60 == 1) {
+      return String("1 hour");
+    } else {
+      return String(secs / 60 / 60) + " hours";
+    }
+  } else {
+    if (secs / 60 / 60 / 24 == 1) {
+      return String("1 day");
+    } else {
+      return String(secs / 60 / 60 / 24) + " days";
+    }
+  }
 }
