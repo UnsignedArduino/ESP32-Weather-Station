@@ -355,7 +355,30 @@ void drawMiscellaneous(TFT_eSPI tft, GfxUi ui, OW_current* current) {
 
   ui.drawBmp("/moon/moonphase_L" + String(icon) + ".bmp", 240 - 60 - 15, 70);
 
+  drawHSeparator(tft, 152);
+
   tft.unloadFont();
+
+  drawMiscellaneousSystem(tft);
+}
+
+void drawMiscellaneousSystem(TFT_eSPI tft) {
+  drawLabelValueTL(tft, "System information", "", 10, 157);
+  drawLabelValueTL(tft, "Chip model: ", String(ESP.getChipModel()) + " rev " + ESP.getChipRevision() + " (" + ESP.getChipCores() + "C)", 10, 167);
+  drawLabelValueTL(tft, "Chip frequency: ", String(ESP.getCpuFreqMHz()) + " MHz", 10, 177);
+  drawLabelValueTL(tft, "EFuse MAC: ", "0x" + uint64ToString(ESP.getEfuseMac(), 16), 10, 187);
+  drawLabelValueTL(tft, "Flash: ", String(ESP.getFlashChipSize() / 1024) + " KiB at " + (ESP.getFlashChipSpeed() / 1000000) + " MHz", 10, 207);;
+  drawLabelValueTL(tft, "Flash mode: ", flashModeToString(ESP.getFlashChipMode()), 10, 197);
+  drawLabelValueTL(tft, "Free heap: ", String(ESP.getFreeHeap() / 1024) + " KiB", 10, 217);
+  drawLabelValueTL(tft, "Free sketch space: ", String(ESP.getFreeSketchSpace() / 1024) + " KiB", 10, 227);
+  drawLabelValueTL(tft, "Heap size: ", String(ESP.getHeapSize() / 1024) + " KiB", 10, 237);
+  drawLabelValueTL(tft, "Max heap alloc: ", String(ESP.getMaxAllocHeap() / 1024) + " KiB", 10, 247);
+  drawLabelValueTL(tft, "Min free heap: ", String(ESP.getMinFreeHeap() / 1024) + " KiB", 10, 257);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+  drawLabelValueTL(tft, "SDK version: ", String(ESP.getSdkVersion()), 10, 267);
+  String sketchMD5 = ESP.getSketchMD5();
+  drawLabelValueTL(tft, "Sketch MD5: ", sketchMD5.substring(0, 26), 10, 277);
+  drawLabelValueTL(tft, "            ", sketchMD5.substring(26), 10, 287);
+  drawLabelValueTL(tft, "Sketch size: ", String(ESP.getSketchSize() / 1024) + " KiB", 10, 297);
 }
 
 void drawLabelValueTL(TFT_eSPI tft, String label, String value, uint16_t x, uint16_t y) {
@@ -363,8 +386,51 @@ void drawLabelValueTL(TFT_eSPI tft, String label, String value, uint16_t x, uint
   tft.setTextColor(TFT_ORANGE, TFT_BLACK);
   tft.setTextPadding(0);
   const unsigned int labelRight = tft.drawString(label, x, y);
+  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
   tft.setTextPadding(240 - labelRight);
   tft.drawString(value, x + labelRight, y);
+  Serial.print(label); 
+  Serial.println(value);
+}
+
+// https://stackoverflow.com/a/49719356/10291933
+String uint64ToString(uint64_t input, uint8_t base/* = 10*/) {
+  String result = "";
+
+  do {
+    char c = input % base;
+    input /= base;
+
+    if (c < 10)
+      c +='0';
+    else
+      c += 'A' - 10;
+    result = c + result;
+  } while (input);
+  return result;
+}
+
+String flashModeToString(FlashMode_t mode) {
+  switch (mode) {
+    case FLASH_WRAP_MODE_DISABLE: {
+      return "FLASH_WRAP_MODE_DISABLE";
+    }
+    case FLASH_WRAP_MODE_8B: {
+      return "FLASH_WRAP_MODE_8B";
+    }
+    case FLASH_WRAP_MODE_16B: {
+      return "FLASH_WRAP_MODE_16B";
+    }
+    case FLASH_WRAP_MODE_32B: {
+      return "FLASH_WRAP_MODE_32B";
+    }
+    case FLASH_WRAP_MODE_64B: {
+      return "FLASH_WRAP_MODE_64B";
+    }
+    default: {
+      return "unknown";
+    }
+  }
 }
 
 const char* getMeteoconIcon(OW_current* current, uint16_t id, bool today) {

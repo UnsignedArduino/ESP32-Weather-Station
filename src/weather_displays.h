@@ -20,7 +20,12 @@ void drawDailyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* da
 void drawDetailDailyForecast(TFT_eSPI tft, GfxUi ui, OW_current* current, OW_daily* daily, uint16_t x, uint16_t y, uint8_t dayIndex);
 
 void drawMiscellaneous(TFT_eSPI tft, GfxUi ui, OW_current* current);
+void drawMiscellaneousSystem(TFT_eSPI tft);
+
 void drawLabelValueTL(TFT_eSPI tft, String label, String value, uint16_t x, uint16_t y);
+
+String uint64ToString(uint64_t input, uint8_t base = 10);
+String flashModeToString(FlashMode_t mode);
 
 const char* getMeteoconIcon(OW_current* current, uint16_t id, bool today);
 
